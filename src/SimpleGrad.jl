@@ -295,12 +295,59 @@ function backward(a::Value)
 end
 
 ###############################################################################################################################################
+###############################################################################################################################################
+###############################################################################################################################################
+###############################################################################################################################################
+## Tensor 
 
 
 
+mutable struct Tensor{opType}
+    data::Union{Array{Float64,1},Array{Float64,2}}
+    grad::Union{Array{Float64,1},Array{Float64,2}}
+    op::opType
+end
+
+
+# constructor -- Tensor(data, grad, op)
+Tensor(x::Union{Array{Float64,1},Array{Float64,2}}) = Tensor(x, zeros(Float64, size(x)), nothing)
 
 
 
+import Base.show
+function show(io::IO, tensor::Tensor)
+    print(io, "Tensor(",tensor.data, ")")
+end
+
+
+backprop!(tensor::Tensor{Nothing}) = nothing
+
+###############################################################################################################################################
+
+# multiplication
+
+
+
+import Base.*
+function *(a::Tensor, b::Tensor)
+
+    out = a.data * b.data
+
+    # Tensor(data, grad, op)
+    result = Tensor(out, zeros(Float64, size(out)), Operation(*, (a, b)))
+
+    return result
+end
+
+
+
+function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<:typeof(*), ArgTypes}
+
+    tensor.op.args[1].grad += tensor.grad * transpose(tensor.op.args[2].data)
+
+    tensor.op.args[2].grad += transpose(tensor.op.args[1].data) * tensor.grad 
+
+end
 
 
 
