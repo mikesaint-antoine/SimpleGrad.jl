@@ -423,7 +423,7 @@ end
 # softmax_crossentropy
 
 
-# TODO - y_true must be Tensor here, not in original version (used to just be array)
+# TODO - y_true must be regular 2D array, NOT tensor (might change later)
 function softmax_crossentropy(a::Tensor,y_true::Union{Array{Int,2},Array{Float64,2}}; grad::Bool=true)
 
     ## implementing softmax activation and cross entropy loss separately leads to very complicated gradients
@@ -451,7 +451,8 @@ function softmax_crossentropy(a::Tensor,y_true::Union{Array{Int,2},Array{Float64
 
 
     # loss_mean
-    out = [mean(sample_losses)]
+    # out = [mean(sample_losses)]
+    out = [sum(sample_losses) / length(sample_losses)]
 
 
 

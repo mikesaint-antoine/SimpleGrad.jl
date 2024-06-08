@@ -1,6 +1,6 @@
 
 using SimpleGrad
-
+import Statistics
 
 
 # struct Operation{FuncType,ArgTypes}
@@ -49,23 +49,19 @@ weights2 = Tensor(rand( 4, 5)); # Matrix with shape (4,5) -- takes 4 inputs, has
 biases1 = Tensor([1.0,1.0,1.0,1.0]); # Bias vector for first layer neurons
 biases2 = Tensor([1.0,1.0,1.0,1.0,1.0]); # Bias vector for second layer neurons
 
+layer1_out = relu(inputs * weights1 + biases1);
+layer2_out = layer1_out * weights2 + biases2;
 
 
-test = inputs * weights1 + biases1
-
-# layer1_out = relu(inputs * weights1 + biases1);
-
-# layer2_out = layer1_out * weights2 + biases2;
+# important -- correct classes should be one-hot encoded and NOT a Tensor, just a regular matrix.
+y_true = [0 1 0 0 0;
+          0 0 0 1 0]
 
 
-# # important -- correct classes should be one-hot encoded and NOT a Tensor, just a regular matrix.
-# y_true = Tensor([0 1 0 0 0;
-#           0 0 0 1 0])
-
-# loss = softmax_crossentropy(layer2_out,y_true)
+loss = softmax_crossentropy(layer2_out,y_true)
 
 
 
-# println(loss)
+println(loss)
 
 println("done")
