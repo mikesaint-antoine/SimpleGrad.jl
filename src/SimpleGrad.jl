@@ -351,6 +351,150 @@ end
 
 ###############################################################################################################################################
 
+# addition
+
+
+# define addition for 2 Tensor objects
+import Base.+
+function +(a::Tensor, b::Tensor)
+
+    if length(size(a.data)) == length(size(b.data))
+        out = a.data .+ b.data
+    elseif length(size(a.data)) > length(size(b.data))
+        # a is 2D, b is 1D
+        out = a.data .+ transpose(b.data)
+    else
+        # a is 1D, b is 2D
+        out = b.data .+ transpose(a.data)
+    end
+
+    # Tensor(data, grad, op)
+    result = Tensor(out, zeros(Float64, size(out)), Operation(+, (a, b)))
+
+    return result
+end
+
+
+# backprop for addition operation
+function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<:typeof(+), ArgTypes}
+
+
+    if length(size(tensor.grad)) > length(size(tensor.op.args[1].data))
+        tensor.op.args[1].grad += dropdims(sum(tensor.grad, dims=1), dims=1) # need dropdims to make this size (x,) rather than size (1,x)
+    else
+        tensor.op.args[1].grad += ones(size(tensor.op.args[1].data)) .* tensor.grad
+    end
+
+    if length(size(tensor.grad)) > length(size(tensor.op.args[2].data))
+        tensor.op.args[2].grad += dropdims(sum(tensor.grad, dims=1), dims=1) # need dropdims to make this size (x,) rather than size (1,x)
+    else
+        tensor.op.args[2].grad += ones(size(tensor.op.args[2].data)) .* tensor.grad
+    end
+
+end
+
+
+###############################################################################################################################################
+
+# relu
+
+function relu(a::Tensor)
+
+    out = max.(a.data,0)
+
+    # Tensor(data, grad, op)
+    result = Tensor(out, zeros(Float64, size(out)), Operation(relu, (a,)))
+
+    return result
+end
+
+
+
+
+function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<:typeof(relu), ArgTypes}
+
+    tensor.op.args[1].grad += (tensor.op.args[1].data .> 0) .* tensor.grad
+
+end
+
+
+###############################################################################################################################################
+
+# softmax_crossentropy
+
+
+# TODO - y_true must be Tensor here, not in original version (used to just be array)
+function softmax_crossentropy(a::Tensor,y_true::Union{Array{Int,2},Array{Float64,2}}; grad::Bool=true)
+
+    ## implementing softmax activation and cross entropy loss separately leads to very complicated gradients
+    ## but combining them makes the gradient a lot easier to deal with
+
+    ## credit to Sendex and his textbook for teaching me this part
+    ## great textbook for doing this stuff in Python, you can get it here:
+    ## https://nnfs.io/
+
+    # softmax activation
+    exp_values = exp.(a.data .- maximum(a.data, dims=2))
+    probs = exp_values ./ sum(exp_values, dims=2)
+    
+    ## crossentropy - sample losses
+    samples = size(probs, 1)
+    probs_clipped = clamp.(probs, 1e-7, 1 - 1e-7)
+    # deal with 0s
+
+
+    # basically just returns an array with the probability of the correct answer for each batch
+    correct_confidences = sum(probs_clipped .* y_true, dims=2)
+
+    # negative log likelihood
+    sample_losses = -log.(correct_confidences)
+
+
+    # loss_mean
+    out = [mean(sample_losses)]
+
+
+
+    if grad
+
+        # it's easier to do the grad calculation here because doing it seperately will involve redoing a lot of calculations
+
+        samples = size(probs, 1)
+
+        # convert from one-hot to index list
+        y_true_argmax = argmax(y_true, dims=2)
+
+        a.grad = copy(probs)
+        for samp_ind in 1:samples
+            a.grad[samp_ind, y_true_argmax[samp_ind][2]] -= 1
+            ## this syntax y_true_argmax[i][2] is just to get the column index of the true value
+        end
+        a.grad ./= samples
+
+
+    end
+
+    # Tensor(data, grad, op)
+    result = Tensor(out, zeros(Float64, size(out)), Operation(softmax_crossentropy, (a,)))
+
+    return result
+end
+
+
+
+function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<:typeof(softmax_crossentropy), ArgTypes}
+
+end
+
+
+
+
+
+
+
+
+###############################################################################################################################################
+
 # full backward pass
 
 
