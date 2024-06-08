@@ -126,12 +126,6 @@ end
 
 
 
-
-
-using SimpleGrad
-using Test
-using Flux
-
 function random_tensor(rows, cols, lower, upper)
     return lower .+ (upper .- lower) .* rand(rows, cols)
 end

@@ -349,6 +349,41 @@ function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<
 
 end
 
+###############################################################################################################################################
+
+# full backward pass
+
+
+
+function backward(a::Tensor)
+
+    function build_topo(v::Tensor, visited=Tensor[], topo=Tensor[])
+        if !(v in visited)
+            push!(visited, v)
+
+            if v.op != nothing
+                for operand in v.op.args
+                    if operand isa Tensor
+                        build_topo(operand, visited, topo)
+                    end
+                end
+            end
+
+            push!(topo, v)
+        end
+        return topo
+    end
+    
+    topo = build_topo(a)
+
+    a.grad .= 1.0
+    for node in reverse(topo)
+        backprop!(node)
+    end
+
+end
+
+
 
 
 end # module
