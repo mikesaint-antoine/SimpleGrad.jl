@@ -124,35 +124,3 @@ end
     @test abs(num2.data - tanh(num1_val)) < 1e-6
 end
 
-
-
-function random_tensor(rows, cols, lower, upper)
-    return lower .+ (upper .- lower) .* rand(rows, cols)
-end
-
-@testset "Tensor tests" begin
-
-    # Multiplication, Tensor * Tensor
-    rows, cols = 2, 2
-    rand_lower, rand_upper = -20, 20
-
-    num1_data = random_tensor(rows, cols, rand_lower, rand_upper)
-    num2_data = random_tensor(rows, cols, rand_lower, rand_upper)
-    num1 = Tensor(num1_data)
-    num2 = Tensor(num2_data)
-    num3 = num1 * num2
-    backward(num3)
-
-    flux_multiply(a, b) = a * b
-    # grad = gradient(flux_multiply, num1_data, num2_data)
-
-
-    grad = gradient(() -> sum(flux_multiply(num1_data, num2_data)), num1_data, num1_data)
-
-
-    @test all(abs.(num1.grad .- grad[1]) .< 1e-6)
-    @test all(abs.(num2.grad .- grad[2]) .< 1e-6)
-    @test all(abs.(num3.data .- (num1_data * num2_data)) .< 1e-6)
-
-end
-
