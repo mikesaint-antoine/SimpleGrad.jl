@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Usage · SimpleGrad.jl</title><meta name="title" content="Usage · SimpleGrad.jl"/><meta property="og:title" content="Usage · SimpleGrad.jl"/><meta property="twitter:title" content="Usage · SimpleGrad.jl"/><meta name="description" content="Documentation for SimpleGrad.jl."/><meta property="og:description" content="Documentation for SimpleGrad.jl."/><meta property="twitter:description" content="Documentation for SimpleGrad.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/custom.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">SimpleGrad.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Welcome</a></li><li class="is-active"><a class="tocitem" href>Usage</a><ul class="internal"><li><a class="tocitem" href="#*Value*-Objects"><span><em>Value</em> Objects</span></a></li><li><a class="tocitem" href="#*Tensor*-Class"><span><em>Tensor</em> Class</span></a></li></ul></li><li><a class="tocitem" href="../under_the_hood/">Under the Hood</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../tutorials/linear_regression/">Linear Regression</a></li><li><a class="tocitem" href="../tutorials/mnist/">MNIST</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Usage</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Usage</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mikesaint-antoine/SimpleGrad.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mikesaint-antoine/SimpleGrad.jl/blob/main/docs/src/usage.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h2 id="*Value*-Objects"><a class="docs-heading-anchor" href="#*Value*-Objects"><em>Value</em> Objects</a><a id="*Value*-Objects-1"></a><a class="docs-heading-anchor-permalink" href="#*Value*-Objects" title="Permalink"></a></h2><p>TEST TEST TEST</p><p>Here&#39;s how you define a <em>Value</em></p><pre><code class="language-julia hljs">using TestPackage
+x = Value(4.0);
+
+println(x)</code></pre><p><em>Value</em> objects can store numbers, perform operations, and automatically track the gradients of the outputs.</p><p>Here&#39;s how you take a look at the number a <em>Value</em> is storing, and it&#39;s gradient:</p><pre><code class="language-julia hljs">println(x.data) # the number, which is 4 in this case</code></pre><pre><code class="language-julia hljs">println(x.grad) # the gradient, which is 0 for now, but will be automatically tracked as we do operations</code></pre><p>Next let&#39;s try an operation. We&#39;ll define another <em>Value</em> called <strong>y</strong>, add it to <strong>x</strong>, and save the result as <strong>z</strong></p><pre><code class="language-julia hljs">y = Value(3.0);
+z = x + y;
+
+println(z)</code></pre><p>Pretty simple so far, right? But here&#39;s the cool part – we can now do a backward pass to calculate the derivative of <strong>z</strong> with respect to <strong>x</strong> and <strong>y</strong>. Here&#39;s how we do that:</p><pre><code class="language-julia hljs">backward(z)</code></pre><p>Now, the <strong>grad</strong> fields of <strong>x</strong> and <strong>y</strong> are populated, and will tell us the derivative of <strong>z</strong> with respect to each of the inputs <strong>x</strong> and <strong>y</strong>.</p><pre><code class="language-julia hljs">println(x.grad) # dz/dx = 1, meaning an increase of 1 in x will lead to an increase of 1 in z.</code></pre><pre><code class="language-julia hljs">println(y.grad) # dy/dx = 1, meaning an increase of 1 in y will lead to an increase of 1 in z.</code></pre><p>Pretty cool, right? So that&#39;s the basic functionality of the <em>Value</em> class. You can store store numbers, do operations, and track the derivative of the output with respect to all of the inputs. This allows you to, for example, minimize a loss function through gradient-descent.</p><p>Here&#39;s a list of the operations currently supported:</p><ul><li><strong>Addition</strong></li><li><strong>Subtraction</strong></li><li><strong>Multiplication</strong></li><li><strong>Division</strong></li><li><strong>Exponents</strong></li><li><strong>e^x</strong></li><li><strong>log()</strong></li><li><strong>tanh()</strong></li></ul><p>These are basically the same as in Karpathy&#39;s Python Micrograd, and basically implemented the same way. Let&#39;s test a couple of them out. We&#39;ve already done addition, so let&#39;s try subtraction.</p><pre><code class="language-julia hljs">x = Value(10.0);
+y = Value(3.0);
+z = x - y;
+
+println(z)</code></pre><p>If you want, you can try <strong>backward(z)</strong>, and you should be able to find <strong>x.grad</strong> = <em>dz/dx</em> = 1 and <strong>y.grad</strong> = <em>dz/dy</em> = -1. But I&#39;ll skip over that for now.</p><p>Next let&#39;s try multiplication.</p><pre><code class="language-julia hljs">x = Value(6.0);
+y = Value(2.0);
+z = x * y;
+
+println(z)</code></pre><p>And again, we can get the derivative with of <strong>z</strong> with respect to <strong>x</strong> and <strong>y</strong>.</p><pre><code class="language-julia hljs"># backward pass for multiplication
+backward(z)
+println(x.grad) # dz/dx = y = 2
+println(y.grad) # dz/dy = x = 6</code></pre><p>Alright, so far so good! Let&#39;s try division now...</p><pre><code class="language-julia hljs">x = Value(15.0);
+y = Value(5.0);
+z = x / y;
+
+println(z)</code></pre><pre><code class="language-julia hljs"># backward pass for division
+backward(z)
+println(x.grad) # dz/dx = 1/5 = 0.2
+println(y.grad) # dz/dy = -15 / x^2 = -0.6</code></pre><p>Ok, now let&#39;s try exponents. <strong>NOTE:</strong> just as in the original Micrograd, the exponents here must be an int or float, NOT a <em>Value</em> object. Might work on fixing this later.</p><pre><code class="language-julia hljs"># exponents
+x = Value(5.0);
+y = 2; # NOTE - exponent can&#39;t be Value, must be int or float
+z = x^y;
+
+println(z)</code></pre><pre><code class="language-julia hljs"># backward pass for exponent
+backward(z)
+println(x.grad) # dz/dx = 2x = 10</code></pre><p>Ok, now for the exponential function e^x, which we will call <strong>exp()</strong>.</p><pre><code class="language-julia hljs"># e^x
+x = Value(2.0);
+z = exp(x);
+
+println(z)</code></pre><pre><code class="language-julia hljs"># backward pass for e^x
+backward(z)
+println(x.grad) # dz/dx = e^x = (same thing we got for above)</code></pre><p>Ok, now for the natural logarithm, which we call <strong>log()</strong>.</p><pre><code class="language-julia hljs"># natural log
+x = Value(10.0);
+z = log(x);
+
+println(z)</code></pre><pre><code class="language-julia hljs"># backward pass for natural log
+backward(z)
+println(x.grad) # dz/dx = 1/x = 0.1</code></pre><p>Lastly, the <strong>tanh()</strong> function. Personally my trig is pretty rusty and I don&#39;t use this function very often, but I&#39;m including it because it was in the original Micrograd. I think Karpathy included it to use as a possible activation function for a linear layer of neurons, to add nonlinearity and bound the layer outputs on [-1, 1].</p><pre><code class="language-julia hljs"># tanh()
+x = Value(3.0);
+z = tanh(x);
+
+println(z)</code></pre><pre><code class="language-julia hljs"># backward pass for tanh()
+backward(z)
+println(x.grad) # dz/dx = 1 - tanh^2(x) = ????</code></pre><p>So far these examples have been pretty simple. But as long as we&#39;re using these simple functions, we can combine them in pretty complicated ways. The gradients can still be calculated for all the inputs, using backpropagation and the chain rule of derivatives.</p><p>Let&#39;s try out a complicated example to see this...</p><pre><code class="language-julia hljs">input1 = Value(2.3);
+input2 = Value(-3.5);
+input3 = Value(3.9);
+
+weight1 = Value(-0.8);
+weight2 = Value(1.8);
+weight3 = Value(3.0);
+
+bias = Value(-3.2);
+
+y_pred = tanh(input1*weight1 + input2*weight2 + input3*weight3 + bias);
+y_true = Value(0.8);
+
+loss = (y_pred - y_true)^2;
+
+println(loss)</code></pre><p>Here we&#39;re using 3 inputs, 3 weights, a bias, and a tanh() activation function to come up with some prediction in a regression problem, and calculating a loss by comparing it to the target value.</p><p>Even though this looks pretty complicated, we can still use <strong>backward(loss)</strong> to calculate the derivative of the loss with respect to everything.</p><pre><code class="language-julia hljs">backward(loss)
+
+println(weight1.grad) # dloss/dweight1
+println(weight2.grad) # dloss/dweight2
+println(weight3.grad) # dloss/dweight3
+println(bias.grad) # dloss/dbias
+
+# if you wanted, you could also see the derivatives of the loss with respect to the inputs, y_pred, or y_true
+# although in a typically neural net situation, those variables would not be updated in the gradient descent</code></pre><h2 id="*Tensor*-Class"><a class="docs-heading-anchor" href="#*Tensor*-Class"><em>Tensor</em> Class</a><a id="*Tensor*-Class-1"></a><a class="docs-heading-anchor-permalink" href="#*Tensor*-Class" title="Permalink"></a></h2><p>The <em>Value</em> class from the original Micrograd is a great tool for understanding how backpropagation works and implementing gradient descent for simple problems like linear regression. Unfortunately though, it&#39;s far too slow to use for even simple neural net problems. So, we&#39;ll define a new <em>Tensor</em> object for those calculations.</p><pre><code class="language-julia hljs">x = Tensor([2.0, 3.0, 4.0]);
+println(x)</code></pre><pre><code class="language-julia hljs">println(x.data)
+println(x.grad)</code></pre><p>Right now the <em>Tensor</em> class pretty much has the bare minimum needed to implement a simple neural network. Here&#39;s a list of the operations currently supported:</p><ul><li><strong>Addition</strong></li><li><strong>Matrix Multiplication / Dot Product</strong></li><li><strong>Relu</strong></li><li><strong>Softmax Activation / Cross Entropy Loss Combination</strong></li></ul><p>Rather than testing out all of these individually, let&#39;s see if we can save some time by testing them all out at once:</p><pre><code class="language-julia hljs"># Tensor test -- attempting a forward pass of a simple neural net
+
+# using Statistics
+# using Random
+# do we need these?
+
+inputs = Tensor(rand(2, 3)); # Matrix with shape (2,3) -- 2 batches, 3 input features per batch
+weights1 = Tensor(rand(3, 4)); # Matrix with shape (3,4) -- takes 3 inputs, has 4 neurons
+weights2 = Tensor(rand( 4, 5)); # Matrix with shape (4,5) -- takes 4 inputs, has 5 neurons
+biases1 = Tensor([1.0,1.0,1.0,1.0]); # Bias vector for first layer neurons
+biases2 = Tensor([1.0,1.0,1.0,1.0,1.0]); # Bias vector for second layer neurons
+
+
+layer1_out = relu(inputs * weights1 + biases1);
+
+layer2_out = layer1_out * weights2 + biases2;
+
+
+# important -- correct classes should be one-hot encoded and NOT a Tensor, just a regular matrix.
+y_true = [0 1 0 0 0;
+          0 0 0 1 0]
+
+loss = softmax_crossentropy(layer2_out,y_true)
+
+
+
+println(loss)</code></pre><p>Now we can find the derivative of the loss with respect to the weights and biases (and inputs although that isn&#39;t as relevant).</p><pre><code class="language-julia hljs">backward(loss)
+
+println(&quot;weights1 gradient:&quot;)
+println(weights1.grad)
+println()
+println(&quot;weights2 gradient:&quot;)
+println(weights2.grad)
+println()
+println(&quot;biases1 gradient:&quot;)
+println(biases1.grad)
+println()
+println(&quot;biases2 gradient:&quot;)
+println(biases2.grad)
+println()</code></pre><p>Pretty cool!</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Welcome</a><a class="docs-footer-nextpage" href="../under_the_hood/">Under the Hood »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Sunday 9 June 2024 11:25">Sunday 9 June 2024</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
