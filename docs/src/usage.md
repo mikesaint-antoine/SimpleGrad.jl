@@ -1,7 +1,3 @@
-
-
-
-
 ## *Values*
 
 Let's start with the *Value* composite type. Here's how you define a *Value*
@@ -261,45 +257,49 @@ println(bias.grad) # dloss/dbias
 
 ## *Tensor* Class
 
-The *Value* class from the original Micrograd is a great tool for understanding how backpropagation works and implementing gradient descent for simple problems like linear regression. Unfortunately though, it's far too slow to use for even simple neural net problems. So, we'll define a new *Tensor* object for those calculations.
+*Values* are pretty useful for specific example, but unfortunately their scalar-valued calculations will be too slow when it comes to implementing even a pretty basic neural network. So in addition to *Values*, we also have our *Tensor* composite type, which stores data in array format (either one-dimensional or two-dimensional).
 
+We can define a *Tensor* like this:
 
 ```julia
-x = Tensor([2.0, 3.0, 4.0]);
+x = Tensor([2.0, 3.0, 4.0])
+
 println(x)
+# output: Tensor([2.0, 3.0, 4.0])
 ```
 
+Similarly to *Values*, *Tensors* also have fields called ```data``` and ```grad``` that store their arrays of numbers and gradients.
 
 ```julia
 println(x.data)
+# output: [2.0, 3.0, 4.0]
+
 println(x.grad)
+# output: [0.0, 0.0, 0.0]
 ```
 
-Right now the *Tensor* class pretty much has the bare minimum needed to implement a simple neural network. Here's a list of the operations currently supported:
+Right now the *Tensor* class pretty much has the bare minimum needed to implement a simple neural network, although I'm probably going to add more in the future. Here's a list of the operations currently supported:
 * **Addition**
-* **Matrix Multiplication / Dot Product**
-* **Relu**
+* **Matrix Multiplication**
+* **ReLU**
 * **Softmax Activation / Cross Entropy Loss Combination**
 
 Rather than testing out all of these individually, let's see if we can save some time by testing them all out at once:
 
 ```julia
-# Tensor test -- attempting a forward pass of a simple neural net
+using Random
+Random.seed!(1234)
 
-# using Statistics
-# using Random
-# do we need these?
-
-inputs = Tensor(rand(2, 3)); # Matrix with shape (2,3) -- 2 batches, 3 input features per batch
-weights1 = Tensor(rand(3, 4)); # Matrix with shape (3,4) -- takes 3 inputs, has 4 neurons
-weights2 = Tensor(rand( 4, 5)); # Matrix with shape (4,5) -- takes 4 inputs, has 5 neurons
-biases1 = Tensor([1.0,1.0,1.0,1.0]); # Bias vector for first layer neurons
-biases2 = Tensor([1.0,1.0,1.0,1.0,1.0]); # Bias vector for second layer neurons
+inputs = Tensor(rand(2, 3)) # Matrix with shape (2,3) -- 2 batches, 3 input features per batch
+weights1 = Tensor(rand(3, 4)) # Matrix with shape (3,4) -- takes 3 inputs, has 4 neurons
+weights2 = Tensor(rand( 4, 5)) # Matrix with shape (4,5) -- takes 4 inputs, has 5 neurons
+biases1 = Tensor([1.0,1.0,1.0,1.0]) # Bias vector for first layer neurons
+biases2 = Tensor([1.0,1.0,1.0,1.0,1.0]) # Bias vector for second layer neurons
 
 
-layer1_out = relu(inputs * weights1 + biases1);
+layer1_out = relu(inputs * weights1 + biases1)
 
-layer2_out = layer1_out * weights2 + biases2;
+layer2_out = layer1_out * weights2 + biases2
 
 
 # important -- correct classes should be one-hot encoded and NOT a Tensor, just a regular matrix.
@@ -311,27 +311,26 @@ loss = softmax_crossentropy(layer2_out,y_true)
 
 
 println(loss)
+# output: Tensor([1.9662258101705288])
 ```
 
-Now we can find the derivative of the loss with respect to the weights and biases (and inputs although that isn't as relevant).
+Now we can find the derivative of the loss with respect to the weights and biases (and inputs if we want although that isn't as relevant).
 
 ```julia
 backward(loss)
 
-println("weights1 gradient:")
 println(weights1.grad)
-println()
-println("weights2 gradient:")
+# output: [0.15435974752037773 -0.15345737221995426 0.2758968460269525 0.10323749643003427; 0.10696292189737254 -0.18148549954816842 0.20715095141049542 0.12882715523280347; 0.16664054851985355 -0.23974576071873882 0.31358944957671503 0.16792563848560238] 
+
 println(weights2.grad)
-println()
-println("biases1 gradient:")
+# output: [1.4368011084584609 -1.2194506134059484 0.01035073085763216 -0.28468347036857006 0.05698224445842545; 1.1107416179804015 -0.8773320376457919 0.008372825855784966 -0.28744229473297594 0.04565988854258152; 1.0101174661066419 -0.8246890949782356 0.007462028540626175 -0.233753522609643 0.04086312294061065; 0.9055652666627538 -0.7839803418601996 0.00643629203797843 -0.16355609507053923 0.035534878230006596]
+
+
 println(biases1.grad)
-println()
-println("biases2 gradient:")
+# output: [0.1994372624495202, -0.31780293172407714, 0.38186796081101293, 0.22451103170524483]
+
 println(biases2.grad)
-println()
+# output: [0.5783840763706425, -0.4259635644934768, 0.0045351214402561, -0.18149144684303034, 0.024535813525608553]
 ```
 
-
-Pretty cool!
-
+Pretty cool! To see how all of this actually works, check out the [Under the Hood](under_the_hood.md) section. For more extensive tutorials, check out the [linear regression](tutorials/linear_regression.md) and [MNIST](tutorials/mnist.md) sections.
