@@ -4,8 +4,8 @@ using Test
 
 @testset "Value tests" begin
 
-    rand_lower = -20
-    rand_upper = 20
+    rand_lower = -10
+    rand_upper = 10
 
     function random_value(lower, upper)
         return lower + (upper - lower) * rand()

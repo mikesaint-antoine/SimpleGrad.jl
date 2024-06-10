@@ -44,7 +44,7 @@ function show(io::IO, value::Value)
 end
 ```
 
-This lets us print a *Value* and see the number that it's storing. The ```import Base: show``` at the top means that we're using a base Julia function called "show" and definining what it will do when we pass a *Value* as an input. We'll be doing this a lot, for many different base functions.
+This lets us print a *Value* and see the number that it's storing. The `import Base: show` at the top means that we're using a base Julia function called "show" and definining what it will do when we pass a *Value* as an input. We'll be doing this a lot, for many different base functions.
 
 Ok, so that's our basic setup for *Values*. At this point, we should be able to run the following code:
 
@@ -172,7 +172,7 @@ Then, the function updates two things: `val.op.args[1].grad` and `val.op.args[2]
 
 So how do we update the gradients? Well as we mentioned before, for a simple addition operation ``z = x + y`` the derivatives of ``z`` with respect to both variables are ``\frac{dz}{dx} = 1`` and ``\frac{dz}{dy} = 1``. This is because increasing either variable by some amount will cause ``z`` to increase by the same amount.
 
-But wait a minute... the code in our ```backprop!()``` function looks way more complicated than that. We're *not* saying ```val.op.args[1].grad = 1``` and ```val.op.args[2].grad = 1``` (setting both gradients equal to 1). Instead we're saying ```val.op.args[1].grad += val.grad``` and ```val.op.args[2].grad += val.grad``` -- incrementing the operand gradients by the current value of the input *Value* gradient. The reason we're doing this is because we need to think ahead a little bit. All this complication isn't necessary for our simple ``z = x + y`` example, but we're trying to write this function in a general way so that it'll also work for more complicated examples in the futures. 
+But wait a minute... the code in our `backprop!()` function looks way more complicated than that. We're *not* saying `val.op.args[1].grad = 1` and `val.op.args[2].grad = 1` (setting both gradients equal to 1). Instead we're saying `val.op.args[1].grad += val.grad` and `val.op.args[2].grad += val.grad` -- incrementing the operand gradients by the current value of the input *Value* gradient. The reason we're doing this is because we need to think ahead a little bit. All this complication isn't necessary for our simple ``z = x + y`` example, but we're trying to write this function in a general way so that it'll also work for more complicated examples in the futures. 
 
 Here's a more complicated example we want to be able to handle (although still using only addition):
 
@@ -196,15 +196,16 @@ println(y.grad)
 println(z.grad)
 # output: 1.0
 ```
+
 This introduces two complications: it has two layers to the calulation, and ``x`` is used *twice*. We use ``z`` as an intermediate variable to store the result of ``x+y``, but ultimately we're interested in ``w = z + x``, and we want to find the derivatives ``\frac{dw}{dx}``and ``\frac{dw}{dy}``.
 
-This example helps explain the rational for writing ```backprop!()``` the way we did. We're calculating the gradients of the operands using the gradient of the input *Value* so that we can take advantage of the [chain rule](https://www.youtube.com/watch?v=YG15m2VwSjA): we can calculate ``\frac{dw}{dy} = \frac{dw}{dz}\frac{dz}{dy}``. This will involve two calls to ```backprop!()```. First, we'll call ```backprop!(w)``` which will calculate the gradient of ```z```, and then we'll call ```backprop!(z)```, which will calculate the gradient of ```y```.
+This example helps explain the rational for writing `backprop!()` the way we did. We're calculating the gradients of the operands using the gradient of the input *Value* so that we can take advantage of the [chain rule](https://www.youtube.com/watch?v=YG15m2VwSjA): we can calculate ``\frac{dw}{dy} = \frac{dw}{dz}\frac{dz}{dy}``. This will involve two calls to `backprop!()`. First, we'll call `backprop!(w)` which will calculate the gradient of `z`, and then we'll call `backprop!(z)`, which will calculate the gradient of `y`.
 
-Getting the gradient of ```x``` is a little more complicated. First, let's quicly prove to ourselves that ``\frac{dw}{dx} = 2``. The full equation for ``w`` is ``w = z + x``. We know that ``z = x + y``, so we can rewrite the equation for ``w`` as ``w = (x + y) + x``. Then, taking the derivative with respect to ``x`` gives us ``\frac{dw}{dx} = 2``. Since ```x``` contributes to the value of ```w``` twice, increasing ```x``` by some amount will increase ```w``` by *twice* that amount.
+Getting the gradient of `x` is a little more complicated. First, let's quicly prove to ourselves that ``\frac{dw}{dx} = 2``. The full equation for ``w`` is ``w = z + x``. We know that ``z = x + y``, so we can rewrite the equation for ``w`` as ``w = (x + y) + x``. Then, taking the derivative with respect to ``x`` gives us ``\frac{dw}{dx} = 2``. Since `x` contributes to the value of `w` twice, increasing `x` by some amount will increase `w` by *twice* that amount.
 
-This is the rationale for why our ```backprop!()``` function increments the gradients its updating, rather than just setting them to some number. This lets us account for situations where the same *Value* contributes more than once to the final sum. In our example, ```x.grad``` will be updated twice by the ```backprop!()``` function -- once during the ```backprop!(w)``` call and once during the ```backprop!(z)``` call. Both of these updates will increase ```x.grad``` by 1, leaving us with our final answer of ``\frac{dw}{dx} = 2``.
+This is the rationale for why our `backprop!()` function increments the gradients its updating, rather than just setting them to some number. This lets us account for situations where the same *Value* contributes more than once to the final sum. In our example, `x.grad` will be updated twice by the `backprop!()` function -- once during the `backprop!(w)` call and once during the `backprop!(z)` call. Both of these updates will increase `x.grad` by 1, leaving us with our final answer of ``\frac{dw}{dx} = 2``.
 
-Still with me? Alright, last part. We said before that ```backprop!()``` is an internal function that won't actually be called by the user. Rather, the user will call a wrapper function ```backward()``` on the final sum *Value*, and that function will do the full backward pass by calling ```backprop!()``` as many times as required to calculate the derivatives for all of the input *Values*. So now we need to write the ```backward()``` function.
+Still with me? Alright, last part. We said before that `backprop!()` is an internal function that won't actually be called by the user. Rather, the user will call a wrapper function `backward()` on the final sum *Value*, and that function will do the full backward pass by calling `backprop!()` as many times as required to calculate the derivatives for all of the input *Values*. So now we need to write the `backward()` function.
 
 First let's take a look at the full code, and then we'll discuss what each part is doing:
 
@@ -238,9 +239,9 @@ function backward(a::Value)
 end
 ```
 
-When we call ```backward(a)``` (where ```a``` is the final result of some operations between *Values*) we want two things to happen. First, we want to fill up an array with ```a``` itself, and all of the other *Value* objects that were used to create ```a```, sorted in topological order so that a *Value* comes after all of the dependencies used to calculate that *Value* -- meaning that ```a``` should be the last element in the array since everything else is a dependency of ```a```. 
+When we call `backward(a)` (where `a` is the final result of some operations between *Values*) we want two things to happen. First, we want to fill up an array with `a` itself, and all of the other *Value* objects that were used to create `a`, sorted in topological order so that a *Value* comes after all of the dependencies used to calculate that *Value* -- meaning that `a` should be the last element in the array since everything else is a dependency of `a`. 
 
-We can build this array with a recursive [depth-first search.] (https://en.wikipedia.org/wiki/Depth-first_search) This is what the nested function ```build_topo()``` is doing. ```build_topo()``` returns the topologically sorted array of all the *Values*, with ```a``` at the end. Then we set ```a.grad = 1```, since the derivative of a variable with respect to itself is 1. Finally, we iterate backwards through the list of *Values* and call ```backprop!()``` on each one to update the gradients of its operands. 
+We can build this array with a recursive [depth-first search.] (https://en.wikipedia.org/wiki/Depth-first_search) This is what the nested function `build_topo()` is doing. `build_topo()` returns the topologically sorted array of all the *Values*, with `a` at the end. Then we set `a.grad = 1`, since the derivative of a variable with respect to itself is 1. Finally, we iterate backwards through the list of *Values* and call `backprop!()` on each one to update the gradients of its operands. 
 
 That's it! We're done! With the code we've written up to this point, we can do as many addition operations between *Values* as we want, then do a backward pass on the final sum to calculate its derivative with respect to all the inputs that went into it. We did it!
 
@@ -253,7 +254,7 @@ Ok, time for a short digression. With our code so far, we can do addition operat
 
 
 
-First let's take the *Value* + *Number* case, like ```Value(2.0) + 3.0``` for example. Here's the code:
+First let's take the *Value* + *Number* case, like `Value(2.0) + 3.0` for example. Here's the code:
 
 ```julia
 # addition for Value + Number
@@ -264,7 +265,7 @@ end
 ```
 
 
-In this case, we just cast the *Number* to a *Value*, and then return the result of the *Value* + *Value* operation -- easy! Next, let's take the case where we have *Number* + *Value*, like ```3.0 + Value(2.0)``` for example. Here's the code:
+In this case, we just cast the *Number* to a *Value*, and then return the result of the *Value* + *Value* operation -- easy! Next, let's take the case where we have *Number* + *Value*, like `3.0 + Value(2.0)` for example. Here's the code:
 
 ```julia
 # addition for number + Value
@@ -316,11 +317,11 @@ function backprop!(val::Value{Operation{FunType, ArgTypes}}) where {FunType<:typ
 end
 ```
 
-That's it! Told you it was easy! The ```*(a::Value, b::Value)``` function is almost exactly the same as the addition function we wrote before, except that we're setting ```out = a.data * b.data``` and recording the operation as ```Operation(*, (a, b) )```. 
+That's it! Told you it was easy! The `*(a::Value, b::Value)` function is almost exactly the same as the addition function we wrote before, except that we're setting `out = a.data * b.data` and recording the operation as `Operation(*, (a, b) )`. 
 
-The ```backprop!()``` function is also very similar to the one we wrote for addition, with just a couple small changes. First of all, we're now using ```where {FunType<:typeof(*), ArgTypes}``` in the funciton definition to specify that this is the version of ```backprop!()``` to use when the input variable was created with a multiplication operation (again, the cool thing about multiple dispatch is that we can define several versions of a function with different input types).
+The `backprop!()` function is also very similar to the one we wrote for addition, with just a couple small changes. First of all, we're now using `where {FunType<:typeof(*), ArgTypes}` in the funciton definition to specify that this is the version of `backprop!()` to use when the input variable was created with a multiplication operation (again, the cool thing about multiple dispatch is that we can define several versions of a function with different input types).
 
-The second minor difference is that we need to change the way the derivates are calculated, since we're dealing with multiplication rather than addition. For a multiplicaiton operation ``z = xy`` the derivatives of ``z`` with respect to ``x`` and ``y`` are ``\frac{dz}{dx} = y``and ``\frac{dz}{dy} = x``. The two lines inside ```backprop!()``` are just saying this in code -- the gradient of each operand is incremented by the value of the other operand multiplied by the ```val.grad``` (the result of the operation) to allow for the chain rule. 
+The second minor difference is that we need to change the way the derivates are calculated, since we're dealing with multiplication rather than addition. For a multiplicaiton operation ``z = xy`` the derivatives of ``z`` with respect to ``x`` and ``y`` are ``\frac{dz}{dx} = y``and ``\frac{dz}{dy} = x``. The two lines inside `backprop!()` are just saying this in code -- the gradient of each operand is incremented by the value of the other operand multiplied by the `val.grad` (the result of the operation) to allow for the chain rule. 
 
 With the code we've written so far, we can do things like this:
 
@@ -343,7 +344,7 @@ println(b.grad)
 # output: 1.0
 ```
 
-By the way, Julia will still take care of the order of operations for us here, so we could have written ```y = b + m * x``` and gotten the same answer.
+By the way, Julia will still take care of the order of operations for us here, so we could have written `y = b + m * x` and gotten the same answer.
 
 Just like in the addition case, we can also add some code make our multiplication robust to *Value* * *Number* and *Number* * *Value* cases:
 
@@ -360,7 +361,7 @@ function *(a::Number, b::Value)
 end
 ```
 
-A lot of the operations will be like the multiplication case, where we'll need to write a new ```backprop!()``` operation. However, sometimes we can find a clever way to do things that avoids this. For example, this is how we'll implement *Value* subtraction:
+A lot of the operations will be like the multiplication case, where we'll need to write a new `backprop!()` operation. However, sometimes we can find a clever way to do things that avoids this. For example, this is how we'll implement *Value* subtraction:
 
 
 ```julia
@@ -377,9 +378,9 @@ function -(a::Value, b::Value)
 end
 ```
 
-The first function ```-(a::Value)``` allows us to negate *Values* with a minus sign. This can be done by multiplying the *Value* by ``-1``, an operation we can already do with our ```*(a::Value, b::Number)``` function. The second function ```-(a::Value, b::Value)``` allows us to do subtraction with *Values* by negating the second *Value* and then adding them together. 
+The first function `-(a::Value)` allows us to negate *Values* with a minus sign. This can be done by multiplying the *Value* by ``-1``, an operation we can already do with our `*(a::Value, b::Number)` function. The second function `-(a::Value, b::Value)` allows us to do subtraction with *Values* by negating the second *Value* and then adding them together. 
 
-Pretty clever, right? This way we don't need to write a new ```backprop!()``` function for subtraction, because we've turned the subtraction operation into a combination of multiplication and addition. 
+Pretty clever, right? This way we don't need to write a new `backprop!()` function for subtraction, because we've turned the subtraction operation into a combination of multiplication and addition. 
 
 Anyway, from here it's just a matter of adding more operations so that we can do more calculations with our *Values*. There are the operations currently supported:
 
@@ -396,7 +397,7 @@ If you've understood everything up to this point, you should be able to read all
 
 ## *Tensor* Objects
 
-*Tensors* work almost exactly the same way as *Values*, except with a little bit of extra complications that come with dealing with vectors and matrices. But the fundamentals are basically the same. We'll track operations with our *Operation* objects, override several base Julia functions to work for *Tensor* operations, and implement the backward pass with an internal ```backprop!()``` function and a user-facing ```backward()``` function.
+*Tensors* work almost exactly the same way as *Values*, except with a little bit of extra complications that come with dealing with vectors and matrices. But the fundamentals are basically the same. We'll track operations with our *Operation* objects, override several base Julia functions to work for *Tensor* operations, and implement the backward pass with an internal `backprop!()` function and a user-facing `backward()` function.
 
 The *Operation* object structure is the same as before:
 
@@ -417,7 +418,7 @@ mutable struct Tensor{opType}
 end
 ```
 
-As you can see, it's very similary to the *Value* object, except that the ```Tensor.data``` and ```Tensor.grad``` fields are arrays (either one-dimensional or two-dimensional) rather than numbers. 
+As you can see, it's very similary to the *Value* object, except that the `Tensor.data` and `Tensor.grad` fields are arrays (either one-dimensional or two-dimensional) rather than numbers. 
 
 Here's the *Tensor* constructor:
 
@@ -427,7 +428,7 @@ Tensor(x::Union{Array{Float64,1},Array{Float64,2}}) = Tensor(x, zeros(Float64, s
 
 Again, same basic idea as the *Value* constructor, except that we're dealing with arrays instead of numbers.
 
-Just a couple more quick things to take care of before we start defining operations. The following code lets us print out *Tensors* and also sets the ```backprop!()``` function to be ```nothing``` in cases where a *Tensor* was defined by the user rather than being created in an operation (again, same as with *Values*):
+Just a couple more quick things to take care of before we start defining operations. The following code lets us print out *Tensors* and also sets the `backprop!()` function to be `nothing` in cases where a *Tensor* was defined by the user rather than being created in an operation (again, same as with *Values*):
 
 
 ```julia
@@ -454,9 +455,9 @@ function *(a::Tensor, b::Tensor)
 end
 ```
 
-Very similar to what we were doing with *Values*, except that this time it's matrix multiplication. But same idea. We do the matrix multiplication with ```out = a.data * b.data```. Then we store the resulting matrix ```out``` along with an emptry gradient ```size(out))``` in a new *Tensor* called ```result```, and record the operation as ```Operation(*, (a, b))```. 
+Very similar to what we were doing with *Values*, except that this time it's matrix multiplication. But same idea. We do the matrix multiplication with `out = a.data * b.data`. Then we store the resulting matrix `out` along with an emptry gradient `size(out))` in a new *Tensor* called `result`, and record the operation as `Operation(*, (a, b))`. 
 
-And here's the ```backprop!()``` function:
+And here's the `backprop!()` function:
 
 ```julia
 function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<:typeof(*), ArgTypes}
@@ -468,7 +469,7 @@ function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<
 end
 ```
 
-Again, basically the same idea as with the *Value* ```backprop!()``` functions. The only difficult part is that now everything has to be done for matrices, which makes the actual calculations more complicated and less intuitive. If you want, you can always work out a simple example on paper to prove to yourself that the gradient updates in this ```backprop!()``` function are actually correct. 
+Again, basically the same idea as with the *Value* `backprop!()` functions. The only difficult part is that now everything has to be done for matrices, which makes the actual calculations more complicated and less intuitive. If you want, you can always work out a simple example on paper to prove to yourself that the gradient updates in this `backprop!()` function are actually correct. 
 
 Finally, here's the code for the full backward pass:
 
@@ -640,7 +641,7 @@ function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<
 end
 ```
 
-Note: this is the most complicated one by far, and is also the odd-one-out in that the gradient is actually calculated during the forward pass (unless told not to), which the ```backprop!()``` function just does nothing. 
+Note: this is the most complicated one by far, and is also the odd-one-out in that the gradient is actually calculated during the forward pass (unless told not to), which the `backprop!()` function just does nothing. 
 
 So yeah, sorry to leave you guys with a complicated one here. I'll probably come back later and try to write a more thorough description of this one when I have some more free time in the future.
 
