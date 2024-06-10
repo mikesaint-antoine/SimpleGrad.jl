@@ -257,7 +257,7 @@ println(bias.grad) # dloss/dbias
 
 ## *Tensor* Class
 
-*Values* are pretty useful for specific example, but unfortunately their scalar-valued calculations will be too slow when it comes to implementing even a pretty basic neural network. So in addition to *Values*, we also have our *Tensor* composite type, which stores data in array format (either one-dimensional or two-dimensional).
+*Values* are pretty useful for some specific cases, but unfortunately their scalar-valued calculations will be too slow when it comes to implementing even a pretty basic neural network. So in addition to *Values*, we also have our *Tensor* composite type, which stores data in array format (either one-dimensional or two-dimensional).
 
 We can define a *Tensor* like this:
 
