@@ -239,7 +239,7 @@ function backward(a::Value)
 end
 ```
 
-When we call `backward(a)` (where `a` is the final result of some operations between *Values*) we want two things to happen. First, we want to fill up an array with `a` itself, and all of the other *Value* objects that were used to create `a`, sorted in topological order so that a *Value* comes after all of the dependencies used to calculate that *Value* -- meaning that `a` should be the last element in the array since everything else is a dependency of `a`. 
+When we call `backward(a)` (where `a` is the final result of some operations between *Values*) we want two things to happen. First, we want to fill up an array with `a` itself, and all of the other *Values* that were used to create `a`, sorted in topological order so that a *Value* comes after all of the dependencies used to calculate that *Value* -- meaning that `a` should be the last element in the array since everything else is a dependency of `a`. 
 
 We can build this array with a recursive [depth-first search.] (https://en.wikipedia.org/wiki/Depth-first_search) This is what the nested function `build_topo()` is doing. `build_topo()` returns the topologically sorted array of all the *Values*, with `a` at the end. Then we set `a.grad = 1`, since the derivative of a variable with respect to itself is 1. Finally, we iterate backwards through the list of *Values* and call `backprop!()` on each one to update the gradients of its operands. 
 
@@ -248,7 +248,7 @@ That's it! We're done! With the code we've written up to this point, we can do a
 Now some of you are probably thinking *Wait a minute, we're not done! All we have is an addition operation for Values, and we haven't even started with Tensors yet!* Ok, yeah, that's true. I guess what I mean is we're done with the *difficult part* -- the *Value* object structure, the logic of operation-tracking, and gradient-updating through backpropagation. Now that we're done with all that, adding more *Value* operations is easy. All we need to know is what the operation does, and how to calculate the derivative for it. Then we can use almost the exact same code we've already written, with only those parts changed. When we finally get to *Tensors*, the code will be almost exactly the same, except the operations and derivative calculations will be for matrix/vector form.
 
 
-## Adding Some Robustness
+## Adding some robustness
 
 Ok, time for a short digression. With our code so far, we can do addition operations between *Values*. This is a good start, but with a couple more lines of code we can add some robustness, so that we'll be able to do operations between *Values* and regular numbers.
 
@@ -292,7 +292,7 @@ println(test)
 
 
 
-## More *Value* Operations
+## More *Value* operations
 
 Alright, so let's add some more *Value* operations. We'll start with multiplication. Here's the code, for both the operation and the backward pass:
 
@@ -393,9 +393,9 @@ Anyway, from here it's just a matter of adding more operations so that we can do
 * **log()**
 * **tanh()**
 
-If you've understood everything up to this point, you should be able to read all the source code for the *Value* objects and make sense of it. If there are any operations you'd like to see added, either let me know and I'll try to add them, or you can also write them yourself and submit a pull request!
+If you've understood everything up to this point, you should be able to read all the source code for the *Values* and make sense of it. If there are any operations you'd like to see added, either let me know and I'll try to add them, or you can also write them yourself and submit a pull request!
 
-## *Tensor* Objects
+## *Tensor* composite type
 
 *Tensors* work almost exactly the same way as *Values*, except with a little bit of extra complications that come with dealing with vectors and matrices. But the fundamentals are basically the same. We'll track operations with our *Operation* objects, override several base Julia functions to work for *Tensor* operations, and implement the backward pass with an internal `backprop!()` function and a user-facing `backward()` function.
 
