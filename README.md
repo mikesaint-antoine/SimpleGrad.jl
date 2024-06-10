@@ -8,6 +8,6 @@ In fact, I started this project because I'm a beginner at machine learning and J
 
 SimpleGrad includes two main [composite types](https://docs.julialang.org/en/v1/manual/types/#Composite-Types) (basically Julia's version of objects/classes): *Values* and *Tensors*. *Values* store single numbers and *Tensors* store arrays of numbers. Both *Values* and *Tensors* support a variety of operations, which are automatically tracked so that the gradients can be calculated with a backward pass.
 
-In the [Usage](usage.md) section, we'll cover how to actually use *Values* and *Tensors* to do calculations and compute gradients. Then in the [Under the Hood](under_the_hood.md) section, we'll take a look at the source code and talk about how it works. Lastly, I've also included two tutorials for extra practice (and will probably add more later): [linear regression](tutorials/linear_regression.md) and [MNIST](tutorials/mnist.md).
+In the [Usage](docs/src/usage.md) section, we'll cover how to actually use *Values* and *Tensors* to do calculations and compute gradients. Then in the [Under the Hood](under_the_hood.md) section, we'll take a look at the source code and talk about how it works. Lastly, I've also included two tutorials for extra practice (and will probably add more later): [linear regression](tutorials/linear_regression.md) and [MNIST](tutorials/mnist.md).
 
 By the way, this project is an ongoing work-in-progress and I'm open to suggestions, criticisms, questions, and pull-requests. You can reach me by email at *mikest@udel.edu*.
