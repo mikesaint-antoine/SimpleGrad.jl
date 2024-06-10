@@ -12,7 +12,7 @@ using Test
     end
 
 
-    delta_var = 0.00000001
+    delta_var = 0.000000001
 
 
     # Addition, Value + Value
