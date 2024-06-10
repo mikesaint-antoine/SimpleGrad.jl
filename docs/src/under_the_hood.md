@@ -1,8 +1,8 @@
 
 
-## *Value* object structure
+## *Value* composite type
 
-The basic *Value* struct looks like this:
+The basic *Value* composite type looks like this:
 
 ```julia
 mutable struct Value{opType}
@@ -12,9 +12,9 @@ mutable struct Value{opType}
 end
 ```
 
-There are three fields: **data**, **grad**, and **op**. We've seen *two* of these fields before, in the Usage section -- **Value.data** and **Value.grad**, representing the number being stored in the Value object and its gradient. 
+There are three fields: `data`, `grad`, and `op`. We've seen *two* of these fields before, in the Usage section -- `Value.data` and `Value.grad`, representing the number being stored in the *Value* and its gradient. 
 
-**Value.op** is something new, that we'll be using behind the scenes as part of the gradient tracking. Basically, we'll use it to keep track of what operations and operands were used to create a *Value* object. To do this, we'll also need to define a new object type of keep track of these operations. Here's what that looks like:
+`Value.op` is something new that we'll be using behind the scenes as part of the gradient tracking. Basically, we'll use it to keep track of what operations and operands were used to create a *Value* object. To do this, we'll also need to define a new composite type of keep track of these operations. Here's what that looks like:
 
 
 ```julia
@@ -24,16 +24,16 @@ struct Operation{FuncType,ArgTypes}
 end
 ```
 
-**Operation.op** will tell us the operation type (addition, multiplication, etc) and **Operation.args** will point to the operands used in the operation, so that we can access them if we want to.
+`Operation.op` will tell us the operation type (addition, multiplication, etc) and `Operation.args` will point to the operands used in the operation, so that we can access them if we want to.
 
-Next, we need a constructor so that we can initialize *Value* objects.
+Next, we need a constructor so that we can initialize *Values*:
 
 ```julia
 # constructor -- Value(data, grad, op)
 Value(x::Number) = Value(Float64(x), 0.0, nothing)
 ```
 
-Looks a bit complicated, I know, but let's break this down. We can initialize a *Value* object with `Value(x)` where `x` is some number. The `Value(Float64(x), 0.0, nothing)` part means that when we initialze a *Value* with `Value(x)`, this will set `Value.data = Float64(x)`, `Value.grad = 0.0` and `Value.op = nothing`. The reason that the operation is set to "nothing" here is because we have initialized this *Value* ourselves rather than creating it as the result of an operation.
+Looks a bit complicated, I know, but let's break this down. We can initialize a *Value* object with `Value(x)` where `x` is some number. The `Value(Float64(x), 0.0, nothing)` part means that when we initialze a *Value* with `Value(x)`, this will set `Value.data = Float64(x)` (casting `x` to a Float64 if it's not already), `Value.grad = 0.0` and `Value.op = nothing`. The reason that the operation is set to "nothing" here is because we have initialized this *Value* ourselves rather than creating it as the result of an operation.
 
 Next, a bit of code so that we can print out values and take a look at them.
 
@@ -44,9 +44,9 @@ function show(io::IO, value::Value)
 end
 ```
 
-This lets us print a *Value* object and see the number that it's storing. The ```import Base: show``` at the top means that we're using a base Julia function called "show" and definining what it will do when we pass a *Value* as an input. We'll be doing this a lot, for many different base functions.
+This lets us print a *Value* and see the number that it's storing. The ```import Base: show``` at the top means that we're using a base Julia function called "show" and definining what it will do when we pass a *Value* as an input. We'll be doing this a lot, for many different base functions.
 
-Ok, so that's our basic setup for the *Value* object. At this point, we should be able to run the following code:
+Ok, so that's our basic setup for *Values*. At this point, we should be able to run the following code:
 
 ```julia
 x = Value(4.0)
@@ -82,14 +82,13 @@ function +(a::Value, b::Value)
 end
 ```
 
-The ```import Base.+``` means that we're importing the base addition function, and ```+(a::Value, b::Value)``` means that we're defining what the ```+``` operator will do when used on two *Value* objects, which we call ```a``` and ```b``` for the purpose of the function definition. Basically this will allow us to do ```x + y``` where ```x``` and ```y``` are *Values* rather than regular numbers.
+The `import Base.+` means that we're importing the base addition function, and `+(a::Value, b::Value)` means that we're defining what the `+` operator will do when used on two *Values*, which we call `a` and `b` for the purpose of the function definition. Basically this will allow us to do `x + y` where `x` and `y` are *Values* rather than regular numbers.
 
-```out = a.data + b.data``` is how we calculate the actual sum of the two input *Values* that will be stored in the output *Value*. Then we create a new *Value* with ```result = Value(out, 0.0, Operation(+, (a, b) ))```. Hopefully this part looks familiar, since we're using the same constructor syntax as before. This will set ```result.data = out```and ```result.grad = 0.0```. The only new part here is that instead of setting ```result.op = nothing```, we're setting ```result.op = Operation(+, (a, b) )``` to specify that this *Value* was created from an addition operation, and pointing to ```a``` and ```b``` as the operands, so that we can access them if we want to. 
+`out = a.data + b.data` is how we calculate the actual sum of the two input *Values* that will be stored in the output *Value*. Then we create a new *Value* with `result = Value(out, 0.0, Operation(+, (a, b) ))`. Hopefully this part looks familiar, since we're using the same constructor syntax as before. This will set `result.data = out` and `result.grad = 0.0`. The only new part here is that instead of setting `result.op = nothing`, we're setting `result.op = Operation(+, (a, b) )` to specify that this *Value* was created from an addition operation, and pointing to `a` and `b` as the operands, so that we can access them if we want to. 
 
 Alright, I know things are getting a little complicated, but setting things up like this will give us a lot of power to go backwards through operations. For example, using only the parts we've written so far you should be able to run this code:
 
 ```julia
-
 # define two Values
 x = Value(2.0)
 y = Value(3.0)
@@ -117,7 +116,6 @@ Alright, now let's try to implement backpropagation for the addition operation. 
 Before we actually write the code for this, I'll first show you what we want the end result to look like:
 
 ```julia
-
 # define two Values
 x = Value(2.0)
 y = Value(3.0)
@@ -139,9 +137,9 @@ println(y.grad)
 # output: 1.0
 ```
 
-Alright so that's how the end result should look, but now we need to actually write the code to get there. To do this, we're going to define a function called ```backprop!()``` that takes in a *Value* as an input, and then computes the gradients of the operands that were used to create the *Value*. This will be an internal function (not actually called by the user), but pretty soon we'll also define another function called ```backward()``` which will perform the full backward pass, calling ```backprop!()``` along the way. 
+Alright so that's how the end result should look, but now we need to actually write the code to get there. To do this, we're going to define a function called `backprop!()` that takes in a *Value* as an input, and then computes the gradients of the operands that were used to create the *Value*. This will be an internal function (not actually called by the user), but pretty soon we'll also define another function called `backward()` which will perform the full backward pass, calling `backprop!()` along the way. 
 
-One of the cool things about Julia is something called "multiple dispatch" -- this means that you can define functions that do things differently based on the type of input that's passed in. If you recall, when we originally defined our *Value* object, we made it so that the object type contains information about the operation that was used to create it: ```Value{opType}```.  
+One of the cool things about Julia is something called "multiple dispatch" -- this means that you can define functions with the same name that do things differently based on the type of input that's passed in. If you recall, when we originally defined our *Value* object, we made it so that the object type contains information about the operation that was used to create it: `Value{opType}`.  
 
 For example:
 ```julia
@@ -150,7 +148,7 @@ println(typeof(x))
 # output: Value{Nothing}
 ```
 
-We'll begin with the ```backprop!()``` function for this simple case, where the *Value* was not created by an operation, but rather defined by the user. In this case, we will just have the ```backprop!()``` function do nothing:
+We'll begin with the `backprop!()` function for this simple case, where the *Value* was not created by an operation, but rather defined by the user. In this case, we will just have the ```backprop!()``` function do nothing:
 
 ```julia
 backprop!(val::Value{Nothing}) = nothing
