@@ -1,4 +1,4 @@
-## SimpleGrad.jl Basics
+## Introduction
 
 Hi, thanks for checking out `SimpleGrad.jl`! This is a machine learning package that can be used for a variety of applications involving gradient-tracking and backpropagation, including neural networks. 
 
