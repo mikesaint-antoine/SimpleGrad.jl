@@ -13,7 +13,7 @@ println(x)
 
 *Values* can store numbers, perform operations, and automatically track the gradients of the variables involved.
 
-Here's how you take a look at the number a *Value* is storing (called ```Value.data```), and it's gradient (called ```Value.grad```):
+Here's how you take a look at the number a *Value* is storing (called ```Value.data```), and its gradient (called ```Value.grad```):
 
 ```julia
 println(x.data) # the number
@@ -54,9 +54,9 @@ println(y.grad) # dz/dy = 1, meaning an increase of 1 in y will lead to an incre
 # output: 1.0
 ```
 
-In mathematical terms, we're considering the equation ``z = x + y`` and are interested in the derivatives ``\frac{dz}{dx}`` and ``\frac{dz}{dy}``. ```x.grad == 1``` tells us that ``\frac{dz}{dx} = 1`` and ```y.grad == 1``` tells us that ``\frac{dz}{dy} = 1`` for the values of ```x``` and ```y``` that we've defined in our code (and in this specific example, for all values of ```x``` and ```y```). If you're rusty on the calculus, you can also think of it this way: increasing ```x``` by 1 will cause ```z``` to increase by 1, and increasing ```y``` by 1 will also cause ```z``` to increase by `.
+In mathematical terms, we're considering the equation ``z = x + y`` and are interested in the derivatives ``\frac{dz}{dx}`` and ``\frac{dz}{dy}``. ```x.grad == 1``` tells us that ``\frac{dz}{dx} = 1`` and ```y.grad == 1``` tells us that ``\frac{dz}{dy} = 1`` for the values of ```x``` and ```y``` that we've defined in our code (and in this specific example, for all values of ```x``` and ```y```). If you're rusty on the calculus, you can also think of it this way: increasing ```x``` by 1 will cause ```z``` to increase by 1, and increasing ```y``` by 1 will also cause ```z``` to increase by 1.
 
-So that's the basic functionality of the *Value* class. You can store store numbers, do operations, and track the derivative of the output with respect to all of the inputs. This allows you to, for example, minimize a loss function through gradient-descent, by tracking the derivative of the loss with respect to the model parameters, and then updating those parameters so that the loss decreases.
+So that's the basic functionality of the *Value* class. We can store store numbers, do operations, and track the derivative of the output with respect to all of the inputs. This allows us to, for example, minimize a loss function through gradient-descent, by tracking the derivative of the loss with respect to the model parameters, and then updating those parameters so that the loss decreases.
 
 Here's a list of the operations currently supported:
 * **Addition**
@@ -79,7 +79,7 @@ println(z)
 # output: Value(7.0)
 ```
 
-If you want, you can try ```backward(z)```, and you should be able to find ```x.grad == 1``` meaning that  ``\frac{dz}{dx} = 1``, and ```x.grad == -1``` meaning that ``\frac{dz}{dy} = -1``. But I'll skip over that for now.
+If you want, you can try ```backward(z)```, and you should be able to find ```x.grad == 1``` meaning that  ``\frac{dz}{dx} = 1``, and ```y.grad == -1``` meaning that ``\frac{dz}{dy} = -1``. But I'll skip over that for now.
 
 Next let's try multiplication.
 
@@ -149,7 +149,7 @@ println(x.grad) # dz/dx = 2x = 10
 ```
 
 
-Ok, now for the exponential function ``e^x``, which we will call **exp()**.
+Ok, now for the exponential function ``e^x``, which we'll call `exp()`.
 
 ```julia
 x = Value(2.0)
