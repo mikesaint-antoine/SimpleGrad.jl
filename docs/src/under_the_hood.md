@@ -148,13 +148,13 @@ println(typeof(x))
 # output: Value{Nothing}
 ```
 
-We'll begin with the `backprop!()` function for this simple case, where the *Value* was not created by an operation, but rather defined by the user. In this case, we will just have the ```backprop!()``` function do nothing:
+We'll begin with the `backprop!()` function for this simple case, where the *Value* was not created by an operation, but rather defined by the user. In this case, we will just have the `backprop!()` function do nothing:
 
 ```julia
 backprop!(val::Value{Nothing}) = nothing
 ```
 
-Now we'll do the harder case, where ```backprop!()``` is applied to the result of an addition operation, to calculate the gradients of the operands. Let's look at the full code first, and then we'll discuss what each part is doing:
+Now we'll do the harder case, where `backprop!()` is applied to the result of an addition operation, to calculate the gradients of the operands. Let's look at the full code first, and then we'll discuss what each part is doing:
 
 ```julia
 function backprop!(val::Value{Operation{FunType, ArgTypes}}) where {FunType<:typeof(+), ArgTypes}
@@ -166,9 +166,9 @@ function backprop!(val::Value{Operation{FunType, ArgTypes}}) where {FunType<:typ
     val.op.args[2].grad += val.grad
 end
 ```
-I know, looks pretty confusing! Let's start with the function definition line: ```backprop!(val::Value{Operation{FunType, ArgTypes}}) where {FunType<:typeof(+), ArgTypes}```. This is just saying that we're definining what the ```backprop!()``` function will do when the input is a *Value* called ```val``` that was created in an addition operation.
+I know, looks pretty confusing! Let's start with the function definition line: `backprop!(val::Value{Operation{FunType, ArgTypes}}) where {FunType<:typeof(+), ArgTypes}`. This is just saying that we're definining what the ``backprop!()` function will do when the input is a *Value* called `val` that was created in an addition operation.
 
-Then, the function updates two things: ```val.op.args[1].grad``` and ```val.op.args[2].grad```. This is how we access the gradients of the operands that were used to create ```val```, so that we can update their gradients.
+Then, the function updates two things: `val.op.args[1].grad` and `val.op.args[2].grad`. This is how we access the gradients of the operands that were used to create `val`, so that we can update their gradients.
 
 So how do we update the gradients? Well as we mentioned before, for a simple addition operation ``z = x + y`` the derivatives of ``z`` with respect to both variables are ``\frac{dz}{dx} = 1`` and ``\frac{dz}{dy} = 1``. This is because increasing either variable by some amount will cause ``z`` to increase by the same amount.
 
