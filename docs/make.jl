@@ -20,4 +20,6 @@ makedocs(
 deploydocs(
     repo = "github.com/mikesaint-antoine/SimpleGrad.jl.git",
     target = "gh-pages",
+    branch = "gh-pages",
+    forcepush = true
 )
