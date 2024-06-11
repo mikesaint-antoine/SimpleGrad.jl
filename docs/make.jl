@@ -14,12 +14,14 @@ makedocs(
             "Linear Regression" => "tutorials/linear_regression.md",
             "MNIST" => "tutorials/mnist.md",
         ],
-    ]
+    ],
+    sitename = "SimpleGrad.jl",
+    root = "docs/build"
 )
+
 
 deploydocs(
     repo = "github.com/mikesaint-antoine/SimpleGrad.jl.git",
-    target = "gh-pages",
-    branch = "gh-pages",
-    forcepush = true
+    branch = "main",
+    target = "docs/build"
 )
