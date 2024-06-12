@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Usage · SimpleGrad.jl</title><meta name="title" content="Usage · SimpleGrad.jl"/><meta property="og:title" content="Usage · SimpleGrad.jl"/><meta property="twitter:title" content="Usage · SimpleGrad.jl"/><meta name="description" content="Documentation for SimpleGrad.jl."/><meta property="og:description" content="Documentation for SimpleGrad.jl."/><meta property="twitter:description" content="Documentation for SimpleGrad.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/custom.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">SimpleGrad.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Welcome</a></li><li class="is-active"><a class="tocitem" href>Usage</a><ul class="internal"><li><a class="tocitem" href="#*Values*"><span><em>Values</em></span></a></li><li><a class="tocitem" href="#*Tensors*"><span><em>Tensors</em></span></a></li></ul></li><li><a class="tocitem" href="../under_the_hood/">Under the Hood</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../tutorials/linear_regression/">Linear Regression</a></li><li><a class="tocitem" href="../tutorials/mnist/">MNIST</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Usage</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Usage</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mikesaint-antoine/SimpleGrad.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mikesaint-antoine/SimpleGrad.jl/blob/main/documentation_generator/src/usage.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h2 id="*Values*"><a class="docs-heading-anchor" href="#*Values*"><em>Values</em></a><a id="*Values*-1"></a><a class="docs-heading-anchor-permalink" href="#*Values*" title="Permalink"></a></h2><p>Let&#39;s start with the <em>Value</em> composite type. Here&#39;s how you define a <em>Value</em></p><pre><code class="language-julia hljs">using SimpleGrad
+
+x = Value(4.0)
+
+println(x)
+# output: Value(4.0)</code></pre><p><em>Values</em> can store numbers, perform operations, and automatically track the gradients of the variables involved.</p><p>Here&#39;s how you take a look at the number a <em>Value</em> is storing (called <code>Value.data</code>), and its gradient (called <code>Value.grad</code>):</p><pre><code class="language-julia hljs">println(x.data) # the number
+# output: 4.0
+
+println(x.grad) # the gradient
+# output: 0.0</code></pre><p>Here, <code>x.data == 4.0</code> because the <em>Value</em> <code>x</code> is storing the number <code>4.0</code>, and <code>x.grad == 0.0</code> is a placeholder for the gradient, which could eventually change if we do some operations and eventually back-calculate the gradient.</p><p>Next let&#39;s try an operation. We&#39;ll define another <em>Value</em> called <code>y</code>, add it to <code>x</code>, and save the result as <code>z</code>.</p><pre><code class="language-julia hljs">y = Value(3.0)
+z = x + y
+
+println(z)
+# output: Value(7.0)</code></pre><p>Pretty simple so far, right? But here&#39;s the cool part – we can now do a backward pass to calculate the derivative of <code>z</code> with respect to <code>x</code> and <code>y</code>. Here&#39;s how we do that:</p><pre><code class="language-julia hljs">backward(z)</code></pre><p>Now, the <code>grad</code> fields of <code>x</code> and <code>y</code> are populated, and will tell us the derivative of <code>z</code> with respect to each of the inputs <code>x</code> and <code>y</code>.</p><pre><code class="language-julia hljs">println(x.grad) # dz/dx = 1, meaning an increase of 1 in x will lead to an increase of 1 in z.
+# output: 1.0
+
+println(y.grad) # dz/dy = 1, meaning an increase of 1 in y will lead to an increase of 1 in z.
+# output: 1.0</code></pre><p>In mathematical terms, we&#39;re considering the equation <span>$z = x + y$</span> and are interested in the derivatives <span>$\frac{dz}{dx}$</span> and <span>$\frac{dz}{dy}$</span>. <code>x.grad == 1</code> tells us that <span>$\frac{dz}{dx} = 1$</span> and <code>y.grad == 1</code> tells us that <span>$\frac{dz}{dy} = 1$</span> for the values of <code>x</code> and <code>y</code> that we&#39;ve defined in our code (and in this specific example, for all values of <code>x</code> and <code>y</code>). If you&#39;re rusty on the calculus, you can also think of it this way: increasing <code>x</code> by 1 will cause <code>z</code> to increase by 1, and increasing <code>y</code> by 1 will also cause <code>z</code> to increase by 1.</p><p>So that&#39;s the basic functionality of the <em>Value</em> class. We can store store numbers, do operations, and track the derivative of the output with respect to all of the inputs. This allows us to, for example, minimize a loss function through gradient-descent, by tracking the derivative of the loss with respect to the model parameters, and then updating those parameters so that the loss decreases.</p><p>Here&#39;s a list of the operations currently supported:</p><ul><li><strong>Addition</strong></li><li><strong>Subtraction</strong></li><li><strong>Multiplication</strong></li><li><strong>Division</strong></li><li><strong>Exponents</strong></li><li><strong>e^x</strong></li><li><strong>log()</strong></li><li><strong>tanh()</strong></li></ul><p>Let&#39;s test a couple of them out. We&#39;ve already done addition, so let&#39;s try subtraction.</p><pre><code class="language-julia hljs">x = Value(10.0)
+y = Value(3.0)
+z = x - y
+
+println(z)
+# output: Value(7.0)</code></pre><p>If you want, you can try <code>backward(z)</code>, and you should be able to find <code>x.grad == 1</code> meaning that  <span>$\frac{dz}{dx} = 1$</span>, and <code>y.grad == -1</code> meaning that <span>$\frac{dz}{dy} = -1$</span>. But I&#39;ll skip over that for now.</p><p>Next let&#39;s try multiplication.</p><pre><code class="language-julia hljs">x = Value(6.0)
+y = Value(2.0)
+z = x * y
+
+println(z)
+# output: Value(12.0)</code></pre><p>And again, we can get the derivative with of <code>z</code> with respect to <code>x</code> and <code>y</code>.</p><pre><code class="language-julia hljs">backward(z)
+
+println(x.grad) # dz/dx = y = 2
+# output: 2.0
+
+println(y.grad) # dz/dy = x = 6
+# output: 6.0</code></pre><p>Alright, so far so good! Let&#39;s try division now:</p><pre><code class="language-julia hljs">x = Value(15.0)
+y = Value(5.0)
+z = x / y
+
+println(z)
+# output: Value(3.0)</code></pre><p>And the backward pass:</p><pre><code class="language-julia hljs">backward(z)
+
+println(x.grad) # dz/dx = 1/5 = 0.2
+# output: 0.2
+
+println(y.grad) # dz/dy = -15 / x^2 = -0.6
+# output: -0.6</code></pre><p>Ok, now let&#39;s try exponents. <strong>NOTE:</strong> for this function, the exponents here must be a regular number, NOT a <em>Value</em>. Might work on fixing this later.</p><pre><code class="language-julia hljs">x = Value(5.0)
+y = 2 # NOTE - exponent can&#39;t be Value, must be int or float.
+z = x^y
+
+println(z)
+# output: Value(25.0)</code></pre><p>And here&#39;s the backward pass:</p><pre><code class="language-julia hljs">backward(z)
+
+println(x.grad) # dz/dx = 2x = 10
+# output: 10.0</code></pre><p>Ok, now for the exponential function <span>$e^x$</span>, which we&#39;ll call <code>exp()</code>.</p><pre><code class="language-julia hljs">x = Value(2.0)
+z = exp(x)
+
+println(z)
+# output: Value(7.38905609893065)</code></pre><p>And here&#39;s the backward pass:</p><pre><code class="language-julia hljs">backward(z)
+
+println(x.grad) # dz/dx = e^x = (same thing we got for above)
+# output: 7.38905609893065</code></pre><p>Ok, now for the natural logarithm, which we call <strong>log()</strong>.</p><pre><code class="language-julia hljs">x = Value(10.0)
+z = log(x)
+
+println(z)
+# output: Value(2.302585092994046)</code></pre><p>And here&#39;s the backward pass:</p><pre><code class="language-julia hljs">backward(z)
+
+println(x.grad) # dz/dx = 1/x = 0.1
+# output: 0.1</code></pre><p>Lastly, the <strong>tanh()</strong> function. Personally my trig is pretty rusty and I don&#39;t use this function very often, but I&#39;m including it because it was in Andrej Karpathy&#39;s <a href="https://www.youtube.com/watch?v=VMj-3S1tku0">Micrograd</a>, which the SimpleGrad <em>Value</em> is based on. <strong>tanh()</strong>  is useful as a possible activation function for a linear layer of neurons, to add nonlinearity and bound the layer outputs on [-1, 1].</p><pre><code class="language-julia hljs">x = Value(3.0)
+z = tanh(x)
+
+println(z)
+# output: Value(0.9950547536867305)</code></pre><p>And here&#39;s the backward pass:</p><pre><code class="language-julia hljs">backward(z)
+println(x.grad) # dz/dx = 1 - tanh^2(x) = ????
+# output: 0.009866037165440211</code></pre><p>So far these examples have been pretty simple. But as long as we&#39;re using these simple functions, we can combine them in pretty complicated ways. The gradients can still be calculated for all the inputs, using backpropagation and the chain rule of derivatives.</p><p>Let&#39;s try out a complicated example to see this...</p><pre><code class="language-julia hljs">input1 = Value(2.3)
+input2 = Value(-3.5)
+input3 = Value(3.9)
+
+weight1 = Value(-0.8)
+weight2 = Value(1.8)
+weight3 = Value(3.0)
+
+bias = Value(-3.2)
+
+y_pred = tanh(input1*weight1 + input2*weight2 + input3*weight3 + bias)
+y_true = Value(0.8)
+
+loss = (y_pred - y_true)^2
+
+println(loss)
+# output: Value(0.20683027474728832)</code></pre><p>Here we&#39;re using 3 inputs, 3 weights, a bias, and a tanh() activation function to come up with some prediction in a regression problem, and calculating a loss by comparing it to the target value.</p><p>Even though this looks pretty complicated, we can still use <strong>backward(loss)</strong> to calculate the derivative of the loss with respect to everything.</p><pre><code class="language-julia hljs">backward(loss)
+
+println(weight1.grad) # dloss/dweight1
+# output: -1.8427042527651991
+
+println(weight2.grad) # dloss/dweight2
+# output: 2.80411516725139
+
+println(weight3.grad) # dloss/dweight3
+# output: -3.12458547208012
+
+println(bias.grad) # dloss/dbias
+# output: -0.8011757620718257</code></pre><h2 id="*Tensors*"><a class="docs-heading-anchor" href="#*Tensors*"><em>Tensors</em></a><a id="*Tensors*-1"></a><a class="docs-heading-anchor-permalink" href="#*Tensors*" title="Permalink"></a></h2><p><em>Values</em> are pretty useful for some specific cases, but unfortunately their scalar-valued calculations will be too slow when it comes to implementing even a pretty basic neural network. So in addition to <em>Values</em>, we also have our <em>Tensor</em> composite type, which stores data in array format (either one-dimensional or two-dimensional).</p><p>We can define a <em>Tensor</em> like this:</p><pre><code class="language-julia hljs">x = Tensor([2.0, 3.0, 4.0])
+
+println(x)
+# output: Tensor([2.0, 3.0, 4.0])</code></pre><p>Similarly to <em>Values</em>, <em>Tensors</em> also have fields called <code>data</code> and <code>grad</code> that store their arrays of numbers and gradients.</p><pre><code class="language-julia hljs">println(x.data)
+# output: [2.0, 3.0, 4.0]
+
+println(x.grad)
+# output: [0.0, 0.0, 0.0]</code></pre><p>Right now the <em>Tensor</em> class pretty much has the bare minimum needed to implement a simple neural network, although I&#39;m probably going to add more in the future. Here&#39;s a list of the operations currently supported:</p><ul><li><strong>Addition</strong></li><li><strong>Matrix Multiplication</strong></li><li><strong>ReLU</strong></li><li><strong>Softmax Activation / Cross Entropy Loss Combination</strong></li></ul><p>Rather than testing out all of these individually, let&#39;s see if we can save some time by testing them all out at once:</p><pre><code class="language-julia hljs">using Random
+Random.seed!(1234)
+
+inputs = Tensor(rand(2, 3)) # Matrix with shape (2,3) -- 2 batches, 3 input features per batch
+weights1 = Tensor(rand(3, 4)) # Matrix with shape (3,4) -- takes 3 inputs, has 4 neurons
+weights2 = Tensor(rand( 4, 5)) # Matrix with shape (4,5) -- takes 4 inputs, has 5 neurons
+biases1 = Tensor([1.0,1.0,1.0,1.0]) # Bias vector for first layer neurons
+biases2 = Tensor([1.0,1.0,1.0,1.0,1.0]) # Bias vector for second layer neurons
+
+
+layer1_out = relu(inputs * weights1 + biases1)
+
+layer2_out = layer1_out * weights2 + biases2
+
+
+# important -- correct classes should be one-hot encoded and NOT a Tensor, just a regular matrix.
+y_true = [0 1 0 0 0;
+          0 0 0 1 0]
+
+loss = softmax_crossentropy(layer2_out,y_true)
+
+
+
+println(loss)
+# output: Tensor([1.9662258101705288])</code></pre><p>Now we can find the derivative of the loss with respect to the weights and biases (and inputs if we want although that isn&#39;t as relevant).</p><pre><code class="language-julia hljs">backward(loss)
+
+println(weights1.grad)
+# output: [0.15435974752037773 -0.15345737221995426 0.2758968460269525 0.10323749643003427; 0.10696292189737254 -0.18148549954816842 0.20715095141049542 0.12882715523280347; 0.16664054851985355 -0.23974576071873882 0.31358944957671503 0.16792563848560238] 
+
+println(weights2.grad)
+# output: [1.4368011084584609 -1.2194506134059484 0.01035073085763216 -0.28468347036857006 0.05698224445842545; 1.1107416179804015 -0.8773320376457919 0.008372825855784966 -0.28744229473297594 0.04565988854258152; 1.0101174661066419 -0.8246890949782356 0.007462028540626175 -0.233753522609643 0.04086312294061065; 0.9055652666627538 -0.7839803418601996 0.00643629203797843 -0.16355609507053923 0.035534878230006596]
+
+
+println(biases1.grad)
+# output: [0.1994372624495202, -0.31780293172407714, 0.38186796081101293, 0.22451103170524483]
+
+println(biases2.grad)
+# output: [0.5783840763706425, -0.4259635644934768, 0.0045351214402561, -0.18149144684303034, 0.024535813525608553]</code></pre><p>Pretty cool! To see how all of this actually works, check out the <a href="../under_the_hood/">Under the Hood</a> section. For more extensive tutorials, check out the <a href="../tutorials/linear_regression/">linear regression</a> and <a href="../tutorials/mnist/">MNIST</a> sections.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Welcome</a><a class="docs-footer-nextpage" href="../under_the_hood/">Under the Hood »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Tuesday 11 June 2024 22:28">Tuesday 11 June 2024</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
