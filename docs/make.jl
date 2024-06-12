@@ -14,9 +14,7 @@ makedocs(
             "Linear Regression" => "tutorials/linear_regression.md",
             "MNIST" => "tutorials/mnist.md",
         ],
-    ],
-    sitename = "SimpleGrad.jl",
-    root = "docs/build"
+    ]
 )
 
 
