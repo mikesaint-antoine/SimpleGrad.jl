@@ -1,6 +1,7 @@
 using SimpleGrad
 using Test
-
+using Random
+Random.seed!(1234)
 
 @testset "Value tests" begin
 
