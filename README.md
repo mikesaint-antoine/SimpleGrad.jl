@@ -1,6 +1,6 @@
 # SimpleGrad.jl
 
-[[Documentation Site](https://mikesaint-antoine.github.io/SimpleGrad.jl)]
+[[Documentation Site]](https://mikesaint-antoine.github.io/SimpleGrad.jl)
 
 Hi, thanks for checking out `SimpleGrad.jl`! This is a machine learning package that can be used for a variety of applications involving gradient-tracking and backpropagation, including neural networks. 
 
