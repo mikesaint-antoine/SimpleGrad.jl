@@ -1,7 +1,7 @@
 name = "SimpleGrad"
 uuid = "837eacb2-5a76-4cde-be3a-83fe353b65ae"
 authors = ["Mike Saint-Antoine <mikest@udel.edu>"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 
