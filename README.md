@@ -1,5 +1,7 @@
 # SimpleGrad.jl
 
+[[Documentation Site](https://mikesaint-antoine.github.io/SimpleGrad.jl)]
+
 Hi, thanks for checking out `SimpleGrad.jl`! This is a machine learning package that can be used for a variety of applications involving gradient-tracking and backpropagation, including neural networks. 
 
 However, unlike most other machine learning packages, the primary goal of SimpleGrad is to be *educational*. So if you're looking for the best possible speed and performance, you probably *shouldn't* use SimpleGrad (maybe check out [Flux](https://fluxml.ai/) instead). But if you're new to machine learning or Julia (or both) and want to understand how things work, then I think you'll find SimpleGrad useful! 
