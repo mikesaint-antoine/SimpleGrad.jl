@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Under the Hood · SimpleGrad.jl</title><meta name="title" content="Under the Hood · SimpleGrad.jl"/><meta property="og:title" content="Under the Hood · SimpleGrad.jl"/><meta property="twitter:title" content="Under the Hood · SimpleGrad.jl"/><meta name="description" content="Documentation for SimpleGrad.jl."/><meta property="og:description" content="Documentation for SimpleGrad.jl."/><meta property="twitter:description" content="Documentation for SimpleGrad.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/custom.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">SimpleGrad.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Welcome</a></li><li><a class="tocitem" href="../usage/">Usage</a></li><li class="is-active"><a class="tocitem" href>Under the Hood</a><ul class="internal"><li><a class="tocitem" href="#*Value*-composite-type"><span><em>Value</em> composite type</span></a></li><li><a class="tocitem" href="#Defining-*Value*-addition"><span>Defining <em>Value</em> addition</span></a></li><li><a class="tocitem" href="#Defining-*Value*-backpropagation"><span>Defining <em>Value</em> backpropagation</span></a></li><li><a class="tocitem" href="#Adding-some-robustness"><span>Adding some robustness</span></a></li><li><a class="tocitem" href="#More-*Value*-operations"><span>More <em>Value</em> operations</span></a></li><li><a class="tocitem" href="#*Tensor*-composite-type"><span><em>Tensor</em> composite type</span></a></li><li><a class="tocitem" href="#More-*Tensor*-operations"><span>More <em>Tensor</em> operations</span></a></li></ul></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../tutorials/linear_regression/">Linear Regression</a></li><li><a class="tocitem" href="../tutorials/mnist/">MNIST</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Under the Hood</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Under the Hood</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mikesaint-antoine/SimpleGrad.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mikesaint-antoine/SimpleGrad.jl/blob/main/documentation_generator/src/under_the_hood.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h2 id="*Value*-composite-type"><a class="docs-heading-anchor" href="#*Value*-composite-type"><em>Value</em> composite type</a><a id="*Value*-composite-type-1"></a><a class="docs-heading-anchor-permalink" href="#*Value*-composite-type" title="Permalink"></a></h2><p>The basic <em>Value</em> composite type looks like this:</p><pre><code class="language-julia hljs">mutable struct Value{opType}
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Under the Hood · SimpleGrad.jl</title><meta name="title" content="Under the Hood · SimpleGrad.jl"/><meta property="og:title" content="Under the Hood · SimpleGrad.jl"/><meta property="twitter:title" content="Under the Hood · SimpleGrad.jl"/><meta name="description" content="Documentation for SimpleGrad.jl."/><meta property="og:description" content="Documentation for SimpleGrad.jl."/><meta property="twitter:description" content="Documentation for SimpleGrad.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/custom.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">SimpleGrad.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Welcome</a></li><li><a class="tocitem" href="../usage/">Usage</a></li><li class="is-active"><a class="tocitem" href>Under the Hood</a><ul class="internal"><li><a class="tocitem" href="#*Value*-composite-type"><span><em>Value</em> composite type</span></a></li><li><a class="tocitem" href="#Defining-*Value*-addition"><span>Defining <em>Value</em> addition</span></a></li><li><a class="tocitem" href="#Defining-*Value*-backpropagation"><span>Defining <em>Value</em> backpropagation</span></a></li><li><a class="tocitem" href="#Adding-some-robustness"><span>Adding some robustness</span></a></li><li><a class="tocitem" href="#More-*Value*-operations"><span>More <em>Value</em> operations</span></a></li><li><a class="tocitem" href="#*Tensor*-composite-type"><span><em>Tensor</em> composite type</span></a></li><li><a class="tocitem" href="#More-*Tensor*-operations"><span>More <em>Tensor</em> operations</span></a></li></ul></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../tutorials/linear_regression/">Linear Regression</a></li><li><a class="tocitem" href="../tutorials/mnist/">MNIST</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Under the Hood</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Under the Hood</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mikesaint-antoine/SimpleGrad.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mikesaint-antoine/SimpleGrad.jl/blob/main/documentation_generator/src/under_the_hood.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h2 id="*Value*-composite-type"><a class="docs-heading-anchor" href="#*Value*-composite-type"><em>Value</em> composite type</a><a id="*Value*-composite-type-1"></a><a class="docs-heading-anchor-permalink" href="#*Value*-composite-type" title="Permalink"></a></h2><p>The basic <em>Value</em> composite type looks like this:</p><pre><code class="language-julia hljs">mutable struct Value{opType} &lt;: Number
     data::Float64
     grad::Float64
     op::opType
-end</code></pre><p>There are three fields: <code>data</code>, <code>grad</code>, and <code>op</code>. We&#39;ve seen <em>two</em> of these fields before, in the Usage section – <code>Value.data</code> and <code>Value.grad</code>, representing the number being stored in the <em>Value</em> and its gradient. </p><p><code>Value.op</code> is something new that we&#39;ll be using behind the scenes as part of the gradient tracking. Basically, we&#39;ll use it to keep track of what operations and operands were used to create a <em>Value</em> object. To do this, we&#39;ll also need to define a new composite type of keep track of these operations. Here&#39;s what that looks like:</p><pre><code class="language-julia hljs">struct Operation{FuncType,ArgTypes}
+end</code></pre><p>The <code>&lt;: Number</code> part means that <code>Value</code> is a subtype of <code>Number</code>. Don&#39;t worry about this for now, but we&#39;ll discuss it more later.</p><p>There are three fields: <code>data</code>, <code>grad</code>, and <code>op</code>. We&#39;ve seen <em>two</em> of these fields before, in the <a href="../usage/">Usage</a> section – <code>Value.data</code> and <code>Value.grad</code>, representing the number being stored in the <em>Value</em> and its gradient. </p><p><code>Value.op</code> is something new that we&#39;ll be using behind the scenes as part of the gradient tracking. Basically, we&#39;ll use it to keep track of what operations and operands were used to create a <em>Value</em> object. To do this, we&#39;ll also need to define a new composite type of keep track of these operations. Here&#39;s what that looks like:</p><pre><code class="language-julia hljs">struct Operation{FuncType,ArgTypes}
     op::FuncType
     args::ArgTypes
 end</code></pre><p><code>Operation.op</code> will tell us the operation type (addition, multiplication, etc) and <code>Operation.args</code> will point to the operands used in the operation, so that we can access them if we want to.</p><p>Next, we need a constructor so that we can initialize <em>Values</em>:</p><pre><code class="language-julia hljs"># constructor -- Value(data, grad, op)
 Value(x::Number) = Value(Float64(x), 0.0, nothing)</code></pre><p>Looks a bit complicated, I know, but let&#39;s break this down. We can initialize a <em>Value</em> object with <code>Value(x)</code> where <code>x</code> is some number. The <code>Value(Float64(x), 0.0, nothing)</code> part means that when we initialze a <em>Value</em> with <code>Value(x)</code>, this will set <code>Value.data = Float64(x)</code> (casting <code>x</code> to a Float64 if it&#39;s not already), <code>Value.grad = 0.0</code> and <code>Value.op = nothing</code>. The reason that the operation is set to &quot;nothing&quot; here is because we have initialized this <em>Value</em> ourselves rather than creating it as the result of an operation.</p><p>Next, a bit of code so that we can print out values and take a look at them.</p><pre><code class="language-julia hljs">import Base: show
 function show(io::IO, value::Value)
     print(io, &quot;Value(&quot;,value.data, &quot;)&quot;)
-end</code></pre><p>This lets us print a <em>Value</em> and see the number that it&#39;s storing. The <code>import Base: show</code> at the top means that we&#39;re using a base Julia function called &quot;show&quot; and definining what it will do when we pass a <em>Value</em> as an input. We&#39;ll be doing this a lot, for many different base functions.</p><p>Ok, so that&#39;s our basic setup for <em>Values</em>. At this point, we should be able to run the following code:</p><pre><code class="language-julia hljs">x = Value(4.0)
+end</code></pre><p>This lets us print a <em>Value</em> and see the number that it&#39;s storing. The <code>import Base: show</code> at the top means that we&#39;re using a base Julia function called &quot;show&quot; and definining what it will do when we pass a <em>Value</em> as an input. We&#39;ll be doing this a lot, for many different base functions. In the <a href="https://github.com/mikesaint-antoine/SimpleGrad.jl/blob/main/src/SimpleGrad.jl">source code</a>, we import all of these functions with one line at the top of the file.</p><p>One more quick formality:</p><pre><code class="language-julia hljs">import Base.==
+function ==(a::Value, b::Value)
+    return a===b
+end</code></pre><p>The triple-equal-sign <code>===</code> checks if two variables are pointing to the same object in memory, so this code means that for two values <code>a</code> and <code>b</code>, the equality check <code>a==b</code> will return <code>true</code> only if they are pointing to the same <em>Value</em> object, and will return <code>false</code> if they&#39;re pointing to two different objects (even if both store the same number, gradient, and operation history). </p><p>Ok, so that&#39;s our basic setup for <em>Values</em>. At this point, we should be able to run the following code:</p><pre><code class="language-julia hljs">x = Value(4.0)
 
 println(x)
 # output: Value(4.0)
@@ -22,15 +25,24 @@ println(x.grad)
 # output: 0.0
 
 println(x.op)
-# output:</code></pre><h2 id="Defining-*Value*-addition"><a class="docs-heading-anchor" href="#Defining-*Value*-addition">Defining <em>Value</em> addition</a><a id="Defining-*Value*-addition-1"></a><a class="docs-heading-anchor-permalink" href="#Defining-*Value*-addition" title="Permalink"></a></h2><p>Alright, so we have our basic building block, but now we want to be able to actually do some calculations with it.</p><p>Let&#39;s start with addition. Bear with me for a second, I&#39;m gonna give you the full block of code and then we&#39;ll go through it bit by bit:</p><pre><code class="language-julia hljs">import Base.+
+# output:
+
+y = Value(4.0)
+
+println(x==y)
+# output: false
+
+z = x # z and x point to the same Value object
+
+println(x==z)
+# output: true</code></pre><h2 id="Defining-*Value*-addition"><a class="docs-heading-anchor" href="#Defining-*Value*-addition">Defining <em>Value</em> addition</a><a id="Defining-*Value*-addition-1"></a><a class="docs-heading-anchor-permalink" href="#Defining-*Value*-addition" title="Permalink"></a></h2><p>Alright, so we have our basic building block, but now we want to be able to actually do some calculations with it.</p><p>Let&#39;s start with addition. Bear with me for a second, I&#39;m gonna give you the full block of code and then we&#39;ll go through it bit by bit:</p><pre><code class="language-julia hljs">import Base.+
 function +(a::Value, b::Value)
+
     out = a.data + b.data
-
-    # Value(data, grad, op)
-    result = Value(out, 0.0, Operation(+, (a, b) ))
-
+    result = Value(out, 0.0, Operation(+, (a, b) )) # Value(data, grad, op)
     return result
-end</code></pre><p>The <code>import Base.+</code> means that we&#39;re importing the base addition function, and <code>+(a::Value, b::Value)</code> means that we&#39;re defining what the <code>+</code> operator will do when used on two <em>Values</em>, which we call <code>a</code> and <code>b</code> for the purpose of the function definition. Basically this will allow us to do <code>x + y</code> where <code>x</code> and <code>y</code> are <em>Values</em> rather than regular numbers.</p><p><code>out = a.data + b.data</code> is how we calculate the actual sum of the two input <em>Values</em> that will be stored in the output <em>Value</em>. Then we create a new <em>Value</em> with <code>result = Value(out, 0.0, Operation(+, (a, b) ))</code>. Hopefully this part looks familiar, since we&#39;re using the same constructor syntax as before. This will set <code>result.data = out</code> and <code>result.grad = 0.0</code>. The only new part here is that instead of setting <code>result.op = nothing</code>, we&#39;re setting <code>result.op = Operation(+, (a, b) )</code> to specify that this <em>Value</em> was created from an addition operation, and pointing to <code>a</code> and <code>b</code> as the operands, so that we can access them if we want to. </p><p>Alright, I know things are getting a little complicated, but setting things up like this will give us a lot of power to go backwards through operations. For example, using only the parts we&#39;ve written so far you should be able to run this code:</p><pre><code class="language-julia hljs"># define two Values
+
+end</code></pre><p>The <code>import Base.+</code> means that we&#39;re importing the base addition function, and <code>+(a::Value, b::Value)</code> means that we&#39;re defining what the <code>+</code> operator will do when used on two <em>Values</em>, which we call <code>a</code> and <code>b</code> for the purpose of the function definition. Basically this will allow us to do <code>x + y</code> where <code>x</code> and <code>y</code> are <em>Values</em> rather than regular numbers. Again, in the <a href="https://github.com/mikesaint-antoine/SimpleGrad.jl/blob/main/src/SimpleGrad.jl">source code</a> all these imports are in one line at the top.</p><p><code>out = a.data + b.data</code> is how we calculate the actual sum of the two input <em>Values</em> that will be stored in the output <em>Value</em>. Then we create a new <em>Value</em> with <code>result = Value(out, 0.0, Operation(+, (a, b) ))</code>. Hopefully this part looks familiar, since we&#39;re using the same constructor syntax as before. This will set <code>result.data = out</code> and <code>result.grad = 0.0</code>. The only new part here is that instead of setting <code>result.op = nothing</code>, we&#39;re setting <code>result.op = Operation(+, (a, b) )</code> to specify that this <em>Value</em> was created from an addition operation, and pointing to <code>a</code> and <code>b</code> as the operands, so that we can access them if we want to. </p><p>Alright, I know things are getting a little complicated, but setting things up like this will give us a lot of power to go backwards through operations. For example, using only the parts we&#39;ve written so far you should be able to run this code:</p><pre><code class="language-julia hljs"># define two Values
 x = Value(2.0)
 y = Value(3.0)
 
@@ -68,11 +80,9 @@ println(y.grad)
 println(typeof(x))
 # output: Value{Nothing}</code></pre><p>We&#39;ll begin with the <code>backprop!()</code> function for this simple case, where the <em>Value</em> was not created by an operation, but rather defined by the user. In this case, we will just have the <code>backprop!()</code> function do nothing:</p><pre><code class="language-julia hljs">backprop!(val::Value{Nothing}) = nothing</code></pre><p>Now we&#39;ll do the harder case, where <code>backprop!()</code> is applied to the result of an addition operation, to calculate the gradients of the operands. Let&#39;s look at the full code first, and then we&#39;ll discuss what each part is doing:</p><pre><code class="language-julia hljs">function backprop!(val::Value{Operation{FunType, ArgTypes}}) where {FunType&lt;:typeof(+), ArgTypes}
 
-    # update gradient of first operand
-    val.op.args[1].grad += val.grad
+    val.op.args[1].grad += val.grad # update gradient of first operand
+    val.op.args[2].grad += val.grad # update gradient of second operand
 
-    # update gradient of second operand
-    val.op.args[2].grad += val.grad
 end</code></pre><p>I know, looks pretty confusing! Let&#39;s start with the function definition line: <code>backprop!(val::Value{Operation{FunType, ArgTypes}}) where {FunType&lt;:typeof(+), ArgTypes}</code>. This is just saying that we&#39;re definining what the `<code>backprop!()</code> function will do when the input is a <em>Value</em> called <code>val</code> that was created in an addition operation.</p><p>Then, the function updates two things: <code>val.op.args[1].grad</code> and <code>val.op.args[2].grad</code>. This is how we access the gradients of the operands that were used to create <code>val</code>, so that we can update their gradients.</p><p>So how do we update the gradients? Well as we mentioned before, for a simple addition operation <span>$z = x + y$</span> the derivatives of <span>$z$</span> with respect to both variables are <span>$\frac{dz}{dx} = 1$</span> and <span>$\frac{dz}{dy} = 1$</span>. This is because increasing either variable by some amount will cause <span>$z$</span> to increase by the same amount.</p><p>But wait a minute... the code in our <code>backprop!()</code> function looks way more complicated than that. We&#39;re <em>not</em> saying <code>val.op.args[1].grad = 1</code> and <code>val.op.args[2].grad = 1</code> (setting both gradients equal to 1). Instead we&#39;re saying <code>val.op.args[1].grad += val.grad</code> and <code>val.op.args[2].grad += val.grad</code> – incrementing the operand gradients by the current value of the input <em>Value</em> gradient. The reason we&#39;re doing this is because we need to think ahead a little bit. All this complication isn&#39;t necessary for our simple <span>$z = x + y$</span> example, but we&#39;re trying to write this function in a general way so that it&#39;ll also work for more complicated examples in the futures. </p><p>Here&#39;s a more complicated example we want to be able to handle (although still using only addition):</p><pre><code class="language-julia hljs">x = Value(2.0)
 y = Value(3.0)
 
@@ -115,14 +125,11 @@ println(z.grad)
         backprop!(node)
     end
 
-end</code></pre><p>When we call <code>backward(a)</code> (where <code>a</code> is the final result of some operations between <em>Values</em>) we want two things to happen. First, we want to fill up an array with <code>a</code> itself, and all of the other <em>Values</em> that were used to create <code>a</code>, sorted in topological order so that a <em>Value</em> comes after all of the dependencies used to calculate that <em>Value</em> – meaning that <code>a</code> should be the last element in the array since everything else is a dependency of <code>a</code>. </p><p>We can build this array with a recursive <a href="https://en.wikipedia.org/wiki/Depth-first_search">depth-first search.</a> This is what the nested function <code>build_topo()</code> is doing. <code>build_topo()</code> returns the topologically sorted array of all the <em>Values</em>, with <code>a</code> at the end. Then we set <code>a.grad = 1</code>, since the derivative of a variable with respect to itself is 1. Finally, we iterate backwards through the list of <em>Values</em> and call <code>backprop!()</code> on each one to update the gradients of its operands. </p><p>That&#39;s it! We&#39;re done! With the code we&#39;ve written up to this point, we can do as many addition operations between <em>Values</em> as we want, then do a backward pass on the final sum to calculate its derivative with respect to all the inputs that went into it. We did it!</p><p>Now some of you are probably thinking <em>Wait a minute, we&#39;re not done! All we have is an addition operation for Values, and we haven&#39;t even started with Tensors yet!</em> Ok, yeah, that&#39;s true. I guess what I mean is we&#39;re done with the <em>difficult part</em> – the <em>Value</em> object structure, the logic of operation-tracking, and gradient-updating through backpropagation. Now that we&#39;re done with all that, adding more <em>Value</em> operations is easy. All we need to know is what the operation does, and how to calculate the derivative for it. Then we can use almost the exact same code we&#39;ve already written, with only those parts changed. When we finally get to <em>Tensors</em>, the code will be almost exactly the same, except the operations and derivative calculations will be for matrix/vector form.</p><h2 id="Adding-some-robustness"><a class="docs-heading-anchor" href="#Adding-some-robustness">Adding some robustness</a><a id="Adding-some-robustness-1"></a><a class="docs-heading-anchor-permalink" href="#Adding-some-robustness" title="Permalink"></a></h2><p>Ok, time for a short digression. With our code so far, we can do addition operations between <em>Values</em>. This is a good start, but with a couple more lines of code we can add some robustness, so that we&#39;ll be able to do operations between <em>Values</em> and regular numbers.</p><p>First let&#39;s take the <em>Value</em> + <em>Number</em> case, like <code>Value(2.0) + 3.0</code> for example. Here&#39;s the code:</p><pre><code class="language-julia hljs"># addition for Value + Number
-function +(a::Value, b::Number)
-    b_value = Value(Float64(b)) # cast b to Value
-    return a + b_value  # use the existing method for Value + Value
-end</code></pre><p>In this case, we just cast the <em>Number</em> to a <em>Value</em>, and then return the result of the <em>Value</em> + <em>Value</em> operation – easy! Next, let&#39;s take the case where we have <em>Number</em> + <em>Value</em>, like <code>3.0 + Value(2.0)</code> for example. Here&#39;s the code:</p><pre><code class="language-julia hljs"># addition for number + Value
-function +(a::Number, b::Value)
-    return b + a # use Value + Number, which then casts the number to Value and does Value + Value
-end</code></pre><p>In this case, we just switch them around so that it becomes a <em>Value</em> + <em>Number</em> operation, which we&#39;ve already covered. Now we should be able to run the following code without a problem:</p><pre><code class="language-julia hljs">test = Value(2.0) + Value(3.0) # Value + Value
+end</code></pre><p>When we call <code>backward(a)</code> (where <code>a</code> is the final result of some operations between <em>Values</em>) we want two things to happen. First, we want to fill up an array with <code>a</code> itself, and all of the other <em>Values</em> that were used to create <code>a</code>, sorted in topological order so that a <em>Value</em> comes after all of the dependencies used to calculate that <em>Value</em> – meaning that <code>a</code> should be the last element in the array since everything else is a dependency of <code>a</code>. </p><p>We can build this array with a recursive <a href="https://en.wikipedia.org/wiki/Depth-first_search">depth-first search.</a> This is what the nested function <code>build_topo()</code> is doing. <code>build_topo()</code> returns the topologically sorted array of all the <em>Values</em>, with <code>a</code> at the end. Then we set <code>a.grad = 1</code>, since the derivative of a variable with respect to itself is 1. Finally, we iterate backwards through the list of <em>Values</em> and call <code>backprop!()</code> on each one to update the gradients of its operands. </p><p>That&#39;s it! We&#39;re done! With the code we&#39;ve written up to this point, we can do as many addition operations between <em>Values</em> as we want, then do a backward pass on the final sum to calculate its derivative with respect to all the inputs that went into it. We did it!</p><p>Now some of you are probably thinking <em>Wait a minute, we&#39;re not done! All we have is an addition operation for Values, and we haven&#39;t even started with Tensors yet!</em> Ok, yeah, that&#39;s true. I guess what I mean is we&#39;re done with the <em>difficult part</em> – the <em>Value</em> object structure, the logic of operation-tracking, and gradient-updating through backpropagation. Now that we&#39;re done with all that, adding more <em>Value</em> operations is easy. All we need to know is what the operation does, and how to calculate the derivative for it. Then we can use almost the exact same code we&#39;ve already written, with only those parts changed. When we finally get to <em>Tensors</em>, the code will be almost exactly the same, except the operations and derivative calculations will be for matrix/vector form.</p><h2 id="Adding-some-robustness"><a class="docs-heading-anchor" href="#Adding-some-robustness">Adding some robustness</a><a id="Adding-some-robustness-1"></a><a class="docs-heading-anchor-permalink" href="#Adding-some-robustness" title="Permalink"></a></h2><p>Ok, time for a short digression. Let&#39;s take another look at our <em>Value</em> definition:</p><pre><code class="language-julia hljs">mutable struct Value{opType} &lt;: Number
+    data::Float64
+    grad::Float64
+    op::opType
+end</code></pre><p>As we mentioned before, the <code>&lt;: Number</code> part means that <code>Value</code> is a subtype of <code>Number</code>. This subtyping isn&#39;t strictly necessary (and in fact an earlier version of this package didn&#39;t have it), but it will make it easy for us to add some robustness to <em>Values</em>. </p><p>For example, with our code so far, we can only do addition operations between <em>Values</em>. This is a good start, but ideally we&#39;d also be able to do operations between <em>Values</em> and regular numbers, and have the output of those operations be a <em>Value</em>. Luckily, we can implement this with one line of code:</p><pre><code class="language-julia hljs">Base.promote_rule(::Type{&lt;:Value}, ::Type{T}) where {T&lt;:Number} = Value</code></pre><p>This line defines a promotion rule, which specifies that for operations involving a <em>Value</em> and a <em>Number</em>, the <em>Number</em> should be converted to a <em>Value</em> for the purposes of the operation, and the result should be a <em>Value</em>. Now we should be able to run the following code without a problem:</p><pre><code class="language-julia hljs">test = Value(2.0) + Value(3.0) # Value + Value
 println(test)
 # output: Value(5.0)
 
@@ -134,19 +141,17 @@ test = 2.0 + Value(3.0) # Number + Value
 println(test)
 # output: Value(5.0)</code></pre><h2 id="More-*Value*-operations"><a class="docs-heading-anchor" href="#More-*Value*-operations">More <em>Value</em> operations</a><a id="More-*Value*-operations-1"></a><a class="docs-heading-anchor-permalink" href="#More-*Value*-operations" title="Permalink"></a></h2><p>Alright, so let&#39;s add some more <em>Value</em> operations. We&#39;ll start with multiplication. Here&#39;s the code, for both the operation and the backward pass:</p><pre><code class="language-julia hljs">import Base.*
 function *(a::Value, b::Value)
+
     out = a.data * b.data
-
-    # Value(data, grad, op)
-    result = Value(out, 0.0, Operation(*, (a, b) ))
-
+    result = Value(out, 0.0, Operation(*, (a, b) )) # Value(data, grad, op)
     return result
+
 end
 
 # backprop for multiplication operation
 function backprop!(val::Value{Operation{FunType, ArgTypes}}) where {FunType&lt;:typeof(*), ArgTypes}
 
     val.op.args[1].grad += val.op.args[2].data * val.grad
-
     val.op.args[2].grad += val.op.args[1].data * val.grad
 
 end</code></pre><p>That&#39;s it! Told you it was easy! The <code>*(a::Value, b::Value)</code> function is almost exactly the same as the addition function we wrote before, except that we&#39;re setting <code>out = a.data * b.data</code> and recording the operation as <code>Operation(*, (a, b) )</code>. </p><p>The <code>backprop!()</code> function is also very similar to the one we wrote for addition, with just a couple small changes. First of all, we&#39;re now using <code>where {FunType&lt;:typeof(*), ArgTypes}</code> in the funciton definition to specify that this is the version of <code>backprop!()</code> to use when the input variable was created with a multiplication operation (again, the cool thing about multiple dispatch is that we can define several versions of a function with different input types).</p><p>The second minor difference is that we need to change the way the derivates are calculated, since we&#39;re dealing with multiplication rather than addition. For a multiplicaiton operation <span>$z = xy$</span> the derivatives of <span>$z$</span> with respect to <span>$x$</span> and <span>$y$</span> are <span>$\frac{dz}{dx} = y$</span>and <span>$\frac{dz}{dy} = x$</span>. The two lines inside <code>backprop!()</code> are just saying this in code – the gradient of each operand is incremented by the value of the other operand multiplied by the <code>val.grad</code> (the result of the operation) to allow for the chain rule. </p><p>With the code we&#39;ve written so far, we can do things like this:</p><pre><code class="language-julia hljs">x = Value(2.0)
@@ -164,50 +169,75 @@ println(x.grad)
 # output: 4.0
 
 println(b.grad)
-# output: 1.0</code></pre><p>By the way, Julia will still take care of the order of operations for us here, so we could have written <code>y = b + m * x</code> and gotten the same answer.</p><p>Just like in the addition case, we can also add some code make our multiplication robust to <em>Value</em> * <em>Number</em> and <em>Number</em> * <em>Value</em> cases:</p><pre><code class="language-julia hljs"># Value * number
-function *(a::Value, b::Number)
-    b_value = Value(Float64(b))  # cast b to Value
-    return a * b_value # use the existing method for Value * Value
-end
-
-# number * Value
-function *(a::Number, b::Value)
-    return b * a # use Value * Number, which then casts the number to Value and does Value * Value
-end</code></pre><p>A lot of the operations will be like the multiplication case, where we&#39;ll need to write a new <code>backprop!()</code> operation. However, sometimes we can find a clever way to do things that avoids this. For example, this is how we&#39;ll implement <em>Value</em> subtraction:</p><pre><code class="language-julia hljs">import Base.-
+# output: 1.0</code></pre><p>By the way, Julia will still take care of the order of operations for us here, so we could have written <code>y = b + m * x</code> and gotten the same answer.</p><p>A lot of the operations will be like the multiplication case, where we&#39;ll need to write a new <code>backprop!()</code> operation. However, sometimes we can find a clever way to do things that avoids this. For example, this is how we&#39;ll implement <em>Value</em> subtraction:</p><pre><code class="language-julia hljs">import Base.-
 
 # negation
 function -(a::Value)
+
     return a * -1
+
 end
 
-# subtraction: Value - Value
+# subtraction
 function -(a::Value, b::Value)
+
     return a + (-b)
-end</code></pre><p>The first function <code>-(a::Value)</code> allows us to negate <em>Values</em> with a minus sign. This can be done by multiplying the <em>Value</em> by <span>$-1$</span>, an operation we can already do with our <code>*(a::Value, b::Number)</code> function. The second function <code>-(a::Value, b::Value)</code> allows us to do subtraction with <em>Values</em> by negating the second <em>Value</em> and then adding them together. </p><p>Pretty clever, right? This way we don&#39;t need to write a new <code>backprop!()</code> function for subtraction, because we&#39;ve turned the subtraction operation into a combination of multiplication and addition. </p><p>Anyway, from here it&#39;s just a matter of adding more operations so that we can do more calculations with our <em>Values</em>. There are the operations currently supported:</p><ul><li><strong>Addition</strong></li><li><strong>Subtraction</strong></li><li><strong>Multiplication</strong></li><li><strong>Division</strong></li><li><strong>Exponents</strong></li><li><strong>e^x</strong></li><li><strong>log()</strong></li><li><strong>tanh()</strong></li></ul><p>If you&#39;ve understood everything up to this point, you should be able to read all the source code for the <em>Values</em> and make sense of it. If there are any operations you&#39;d like to see added, either let me know and I&#39;ll try to add them, or you can also write them yourself and submit a pull request!</p><h2 id="*Tensor*-composite-type"><a class="docs-heading-anchor" href="#*Tensor*-composite-type"><em>Tensor</em> composite type</a><a id="*Tensor*-composite-type-1"></a><a class="docs-heading-anchor-permalink" href="#*Tensor*-composite-type" title="Permalink"></a></h2><p><em>Tensors</em> work almost exactly the same way as <em>Values</em>, except with a little bit of extra complications that come with dealing with vectors and matrices. But the fundamentals are basically the same. We&#39;ll track operations with our <em>Operation</em> objects, override several base Julia functions to work for <em>Tensor</em> operations, and implement the backward pass with an internal <code>backprop!()</code> function and a user-facing <code>backward()</code> function.</p><p>The <em>Operation</em> object structure is the same as before:</p><pre><code class="language-julia hljs">struct Operation{FuncType,ArgTypes}
+
+end</code></pre><p>The first function <code>-(a::Value)</code> allows us to negate <em>Values</em> with a minus sign. This can be done by multiplying the <em>Value</em> by <span>$-1$</span>, an operation we can already do with our <code>*(a::Value, b::Number)</code> function. The second function <code>-(a::Value, b::Value)</code> allows us to do subtraction with <em>Values</em> by negating the second <em>Value</em> and then adding them together. </p><p>Pretty clever, right? This way we don&#39;t need to write a new <code>backprop!()</code> function for subtraction, because we&#39;ve turned the subtraction operation into a combination of multiplication and addition. </p><p>Anyway, from here it&#39;s just a matter of adding more operations so that we can do more calculations with our <em>Values</em>. There are the operations currently supported:</p><ul><li><strong>Addition</strong></li><li><strong>Subtraction</strong></li><li><strong>Multiplication</strong></li><li><strong>Division</strong></li><li><strong>Exponents</strong></li><li><strong>e^x</strong></li><li><strong>log()</strong></li><li><strong>tanh()</strong></li></ul><p>If you&#39;ve understood everything up to this point, you should be able to read all the <a href="https://github.com/mikesaint-antoine/SimpleGrad.jl/blob/main/src/SimpleGrad.jl">source code</a> for the <em>Values</em> and make sense of it. If there are any operations you&#39;d like to see added, either let me know and I&#39;ll try to add them, or you can also write them yourself and submit a pull request!</p><h2 id="*Tensor*-composite-type"><a class="docs-heading-anchor" href="#*Tensor*-composite-type"><em>Tensor</em> composite type</a><a id="*Tensor*-composite-type-1"></a><a class="docs-heading-anchor-permalink" href="#*Tensor*-composite-type" title="Permalink"></a></h2><p><em>Tensors</em> work almost exactly the same way as <em>Values</em>, except with a little bit of extra complications that come with dealing with vectors and matrices. But the fundamentals are basically the same. We&#39;ll track operations with our <em>Operation</em> objects, override several base Julia functions to work for <em>Tensor</em> operations, and implement the backward pass with an internal <code>backprop!()</code> function and a user-facing <code>backward()</code> function.</p><p>The <em>Operation</em> object structure is the same as before:</p><pre><code class="language-julia hljs">struct Operation{FuncType,ArgTypes}
     op::FuncType
     args::ArgTypes
-end</code></pre><p>And here&#39;s our definition of the <em>Tensor</em> object structure:</p><pre><code class="language-julia hljs">mutable struct Tensor{opType}
-    data::Union{Array{Float64,1},Array{Float64,2}}
-    grad::Union{Array{Float64,1},Array{Float64,2}}
+end</code></pre><p>And here&#39;s our definition of the <em>Tensor</em> object structure:</p><pre><code class="language-julia hljs">mutable struct Tensor{opType} &lt;: AbstractArray{Float64, 2}
+    data::Array{Float64, 2}
+    grad::Array{Float64, 2}
     op::opType
-end</code></pre><p>As you can see, it&#39;s very similary to the <em>Value</em> object, except that the <code>Tensor.data</code> and <code>Tensor.grad</code> fields are arrays (either one-dimensional or two-dimensional) rather than numbers. </p><p>Here&#39;s the <em>Tensor</em> constructor:</p><pre><code class="language-julia hljs">Tensor(x::Union{Array{Float64,1},Array{Float64,2}}) = Tensor(x, zeros(Float64, size(x)), nothing)</code></pre><p>Again, same basic idea as the <em>Value</em> constructor, except that we&#39;re dealing with arrays instead of numbers.</p><p>Just a couple more quick things to take care of before we start defining operations. The following code lets us print out <em>Tensors</em> and also sets the <code>backprop!()</code> function to be <code>nothing</code> in cases where a <em>Tensor</em> was defined by the user rather than being created in an operation (again, same as with <em>Values</em>):</p><pre><code class="language-julia hljs">import Base.show
+end</code></pre><p>As you can see, it&#39;s very similary to the <em>Value</em> object, except that the <code>Tensor.data</code> and <code>Tensor.grad</code> fields are arrays rather than numbers. Note also that just as <code>Value</code> is a subtype of <code>Number</code>, <code>Tensor</code> is a subtype of <code>AbstractArray{Float64, 2}</code>, a 2-dimensional array of type <code>Float64</code>.</p><p>We&#39;re going to have two different contstructors for our <em>Tensor</em> type - one to create a <em>Tensor</em> from a 2D array, and another to create a <em>Tensor</em> from a 1D array. Here&#39;s the 2D constructor:</p><p>Here&#39;s the <em>Tensor</em> constructor:</p><pre><code class="language-julia hljs">Tensor(x::Array{Float64,2}) = Tensor(x, zeros(Float64, size(x)), nothing)</code></pre><p>Again, same basic idea as the <em>Value</em> constructor, except that we&#39;re dealing with arrays instead of numbers. Note that the constructor requires a <code>Float64</code> array as input and won&#39;t accept other number types. Maybe I&#39;ll change that later to make it more robust.</p><p>Besides the 2D constructor, we also want the option to pass a 1D array and have it create either a row vector or column vector <em>Tensor</em>. For example, we want to be able to write this code, where we pass in a 1D array with shape (3,) and get a row vector <em>Tensor</em> with shape (1,3):</p><pre><code class="language-julia hljs">x = [1.0, 2.0, 3.0]
+
+println(size(x))
+# output: (3,)
+
+x = Tensor(x)
+
+println(size(x))
+# output: (1,3)</code></pre><p>Here&#39;s the 1D constructor that will let us do that:</p><pre><code class="language-julia hljs">function Tensor(x::Array{Float64, 1}; column_vector::Bool=false)
+
+    if column_vector
+        # column vector - size (N,1)
+        data_2D = reshape(x, (length(x), 1))
+    else
+        # DEFAULT row vector - size (1,N)
+        data_2D = reshape(x, (1,length(x)))
+    end
+
+    Tensor(data_2D, zeros(Float64, size(data_2D)), nothing) # Tensor(data, grad, op)
+    
+end</code></pre><p>Pretty simple, we just take in the 1D array and reshape it to a row vector with <code>reshape(x, (1,length(x)))</code> by default, or to a column vector with <code>reshape(x, (length(x), 1))</code> if the user sets <code>column_vector::Bool=true</code>.</p><p>Just a couple more quick things, which are also similar to our <em>Value</em> setup. The following code lets us print out <em>Tensors</em>, sets the <code>backprop!()</code> function to be <code>nothing</code> in cases where a <em>Tensor</em> was defined by the user rather than being created in an operation, and specifies that the equality check <code>==</code> will return <code>true</code> only if the two variables actually reference the same <em>Tensor</em> object:</p><pre><code class="language-julia hljs">import Base.show
 function show(io::IO, tensor::Tensor)
     print(io, &quot;Tensor(&quot;,tensor.data, &quot;)&quot;)
 end
 
-backprop!(tensor::Tensor{Nothing}) = nothing</code></pre><p>Ok, now let&#39;s try defining a <em>Tensor</em> operation. When we were learning about how <em>Values</em> work we started with addition because that seemed like the easiest. But for <em>Tensors</em>, addition will actually be a little tough because of some shape-broadcasting we&#39;ll need to do. So we&#39;ll start with matrix multiplication, since that will be easier. Here&#39;s the code:</p><pre><code class="language-julia hljs">import Base.*
+backprop!(tensor::Tensor{Nothing}) = nothing
+
+import Base.==
+function ==(a::Tensor, b::Tensor)
+    return a===b
+end</code></pre><p>So that covers the necessary parts. Now we can also add a couple more things just for convenience. Here&#39;s a line of code that will allow us to call <code>size(Tensor)</code> to get the shape of the <code>Tensor.data</code> field (which should be the same as the <code>Tensor.grad</code> field):</p><pre><code class="language-julia hljs">Base.size(x::Tensor) = size(x.data)</code></pre><p>Here&#39;s a line of code that allows use to use standard array index notation to access elements of <code>Tensor.data</code>. </p><pre><code class="language-julia hljs">Base.getindex(x::Tensor, i...) = getindex(x.data, i...)</code></pre><p>So for example, if we have a <em>Tensor</em> called <code>a</code>, we can access elements of <code>a.data</code> by writing <code>a[i,j]</code> instead of having to write <code>a.data[i,j]</code>.</p><p>Here&#39;s a similar line that allows us to <em>set</em> elements using standard array index notation:</p><pre><code class="language-julia hljs">Base.setindex!(x::Tensor, v, i...) = setindex!(x.data, v, i...)</code></pre><p>So if we want to set an element of <code>a</code> to <code>7</code>, for example, we can just write <code>a[i,j] = 7</code>, rather than having to write <code>a.data[i,j] = 7</code>. So with those three lines added, we should now be able to run the following code:</p><pre><code class="language-julia hljs">x = Tensor([1.0 2.0; 3.0 4.0])
+
+println(size(x))
+# output: (2,2)
+
+x[2,2] = 5.0
+
+println(x[2,2])
+# output: 5.0</code></pre><p>Ok, now let&#39;s try defining a <em>Tensor</em> operation. When we were learning about how <em>Values</em> work we started with addition because that seemed like the easiest. But for <em>Tensors</em>, addition will actually be a little tough because of some shape-broadcasting we&#39;ll need to do. So we&#39;ll start with matrix multiplication, since that will be easier. Here&#39;s the code:</p><pre><code class="language-julia hljs">import Base.*
 function *(a::Tensor, b::Tensor)
 
     out = a.data * b.data
-
-    # Tensor(data, grad, op)
-    result = Tensor(out, zeros(Float64, size(out)), Operation(*, (a, b)))
-
+    result = Tensor(out, zeros(Float64, size(out)), Operation(*, (a, b))) # Tensor(data, grad, op)
     return result
+
 end</code></pre><p>Very similar to what we were doing with <em>Values</em>, except that this time it&#39;s matrix multiplication. But same idea. We do the matrix multiplication with <code>out = a.data * b.data</code>. Then we store the resulting matrix <code>out</code> along with an emptry gradient <code>size(out))</code> in a new <em>Tensor</em> called <code>result</code>, and record the operation as <code>Operation(*, (a, b))</code>. </p><p>And here&#39;s the <code>backprop!()</code> function:</p><pre><code class="language-julia hljs">function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType&lt;:typeof(*), ArgTypes}
 
     tensor.op.args[1].grad += tensor.grad * transpose(tensor.op.args[2].data)
-
     tensor.op.args[2].grad += transpose(tensor.op.args[1].data) * tensor.grad 
 
 end</code></pre><p>Again, basically the same idea as with the <em>Value</em> <code>backprop!()</code> functions. The only difficult part is that now everything has to be done for matrices, which makes the actual calculations more complicated and less intuitive. If you want, you can always work out a simple example on paper to prove to yourself that the gradient updates in this <code>backprop!()</code> function are actually correct. </p><p>Finally, here&#39;s the code for the full backward pass:</p><pre><code class="language-julia hljs">function backward(a::Tensor)
@@ -239,45 +269,35 @@ end</code></pre><p>Again, basically the same idea as with the <em>Value</em> <co
 end</code></pre><p>Again, almost exactly the same as for the <em>Values</em>.</p><h2 id="More-*Tensor*-operations"><a class="docs-heading-anchor" href="#More-*Tensor*-operations">More <em>Tensor</em> operations</a><a id="More-*Tensor*-operations-1"></a><a class="docs-heading-anchor-permalink" href="#More-*Tensor*-operations" title="Permalink"></a></h2><p>For the sake of completeness, I&#39;m going to give you the code for all of the <em>Tensor</em> operations needed to write a basic neural network. For now, working through the details to understand them will be left as an exercise for the reader, although I&#39;ll probably try to come back to this section to write a more complete description when I have some more free time.</p><p>Here&#39;s addition:</p><pre><code class="language-julia hljs">import Base.+
 function +(a::Tensor, b::Tensor)
 
-    if length(size(a.data)) == length(size(b.data))
-        out = a.data .+ b.data
-    elseif length(size(a.data)) &gt; length(size(b.data))
-        # a is 2D, b is 1D
-        out = a.data .+ transpose(b.data)
-    else
-        # a is 1D, b is 2D
-        out = b.data .+ transpose(a.data)
-    end
-
-    # Tensor(data, grad, op)
-    result = Tensor(out, zeros(Float64, size(out)), Operation(+, (a, b)))
-
+    # broadcasting happens automatically for row-vector
+    out = a.data .+ b.data
+    result = Tensor(out, zeros(Float64, size(out)), Operation(+, (a, b))) # Tensor(data, grad, op)
     return result
+
 end
 
 function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType&lt;:typeof(+), ArgTypes}
 
-
-    if length(size(tensor.grad)) &gt; length(size(tensor.op.args[1].data))
-        tensor.op.args[1].grad += dropdims(sum(tensor.grad, dims=1), dims=1) # need dropdims to make this size (x,) rather than size (1,x)
-    else
+    if size(tensor.grad) == size(tensor.op.args[1].data)
         tensor.op.args[1].grad += ones(size(tensor.op.args[1].data)) .* tensor.grad
-    end
-
-    if length(size(tensor.grad)) &gt; length(size(tensor.op.args[2].data))
-        tensor.op.args[2].grad += dropdims(sum(tensor.grad, dims=1), dims=1) # need dropdims to make this size (x,) rather than size (1,x)
     else
-        tensor.op.args[2].grad += ones(size(tensor.op.args[2].data)) .* tensor.grad
+        # reverse broadcast
+        tensor.op.args[1].grad += ones(size(tensor.op.args[1].grad)) .* sum(tensor.grad,dims=1)
     end
 
-end</code></pre><p>Hint about this one: the complicated parts are related to broadcasting so that we can add add a one-dimensional vector to a two-dimensional matrix (like adding biases in a neural net).</p><p>Here&#39;s the ReLU activation function:</p><pre><code class="language-julia hljs">function relu(a::Tensor)
+    if size(tensor.grad) == size(tensor.op.args[2].data)
+        tensor.op.args[2].grad += ones(size(tensor.op.args[2].data)) .* tensor.grad
+    else
+        # reverse broadcast
+        tensor.op.args[2].grad += ones(size(tensor.op.args[2].grad)) .* sum(tensor.grad,dims=1)
+    end
+
+end</code></pre><p>Hint about this one: the complicated parts are related to broadcasting so that we can add add a row vector to a matrix and have it automatically be added to every row (like adding biases in a neural net).</p><p>Here&#39;s the ReLU activation function:</p><pre><code class="language-julia hljs">function relu(a::Tensor)
 
     out = max.(a.data,0)
-
-    # Tensor(data, grad, op)
-    result = Tensor(out, zeros(Float64, size(out)), Operation(relu, (a,)))
-
+    result = Tensor(out, zeros(Float64, size(out)), Operation(relu, (a,))) # Tensor(data, grad, op)
     return result
+
 end
 
 function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType&lt;:typeof(relu), ArgTypes}
@@ -296,11 +316,9 @@ end</code></pre><p>Here&#39;s the combined softmax activation and cross entropy 
     # softmax activation
     exp_values = exp.(a.data .- maximum(a.data, dims=2))
     probs = exp_values ./ sum(exp_values, dims=2)
-    
-    ## crossentropy - sample losses
-    samples = size(probs, 1)
+
     probs_clipped = clamp.(probs, 1e-7, 1 - 1e-7)
-    # deal with 0s
+    # deal with 0s and 1s
 
 
     # basically just returns an array with the probability of the correct answer for each batch
@@ -309,9 +327,8 @@ end</code></pre><p>Here&#39;s the combined softmax activation and cross entropy 
     # negative log likelihood
     sample_losses = -log.(correct_confidences)
 
-
-    # loss_mean
-    out = [mean(sample_losses)]
+    # loss mean
+    out = [sum(sample_losses) / length(sample_losses)]
 
 
 
@@ -325,23 +342,29 @@ end</code></pre><p>Here&#39;s the combined softmax activation and cross entropy 
         y_true_argmax = argmax(y_true, dims=2)
 
         a.grad = copy(probs)
+
         for samp_ind in 1:samples
+
             a.grad[samp_ind, y_true_argmax[samp_ind][2]] -= 1
             ## this syntax y_true_argmax[i][2] is just to get the column index of the true value
-        end
-        a.grad ./= samples
 
+        end
+
+        a.grad ./= samples
 
     end
 
-    # Tensor(data, grad, op)
-    result = Tensor(out, zeros(Float64, size(out)), Operation(softmax_crossentropy, (a,)))
+    # reshape out from (1,) to (1,1) 
+    out = reshape(out, (1, 1))
+
+    result = Tensor(out, zeros(Float64, size(out)), Operation(softmax_crossentropy, (a,))) # Tensor(data, grad, op)
 
     return result
+
 end
 
 
-
+# softmax_crossentropy backprop is empty because gradient is easier to calculate during forward pass
 function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType&lt;:typeof(softmax_crossentropy), ArgTypes}
 
-end</code></pre><p>Note: this is the most complicated one by far, and is also the odd-one-out in that the gradient is actually calculated during the forward pass (unless told not to), which the <code>backprop!()</code> function just does nothing. </p><p>So yeah, sorry to leave you guys with a complicated one here. I&#39;ll probably come back later and try to write a more thorough description of this one when I have some more free time in the future.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../usage/">« Usage</a><a class="docs-footer-nextpage" href="../tutorials/linear_regression/">Linear Regression »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Tuesday 11 June 2024 22:39">Tuesday 11 June 2024</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+end</code></pre><p>Note: this is the most complicated one by far, and is also the odd-one-out in that the gradient is actually calculated during the forward pass (unless told not to), which the <code>backprop!()</code> function just does nothing. </p><p>So yeah, sorry to leave you guys with a complicated one here. I&#39;ll probably come back later and try to write a more thorough description of this one when I have some more free time in the future.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../usage/">« Usage</a><a class="docs-footer-nextpage" href="../tutorials/linear_regression/">Linear Regression »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Friday 21 June 2024 20:38">Friday 21 June 2024</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -43,8 +43,8 @@ println(x.grad) # dz/dx = 1/5 = 0.2
 # output: 0.2
 
 println(y.grad) # dz/dy = -15 / x^2 = -0.6
-# output: -0.6</code></pre><p>Ok, now let&#39;s try exponents. <strong>NOTE:</strong> for this function, the exponents here must be a regular number, NOT a <em>Value</em>. Might work on fixing this later.</p><pre><code class="language-julia hljs">x = Value(5.0)
-y = 2 # NOTE - exponent can&#39;t be Value, must be int or float.
+# output: -0.6</code></pre><p>Ok, now let&#39;s try exponents. <strong>NOTE:</strong> for this function, the exponent must be an Integer, NOT a <em>Value</em> or Float. Might work on fixing this later.</p><pre><code class="language-julia hljs">x = Value(5.0)
+y = 2 # NOTE - exponent must be an Integer, not a Value or Float
 z = x^y
 
 println(z)
@@ -112,8 +112,8 @@ Random.seed!(1234)
 inputs = Tensor(rand(2, 3)) # Matrix with shape (2,3) -- 2 batches, 3 input features per batch
 weights1 = Tensor(rand(3, 4)) # Matrix with shape (3,4) -- takes 3 inputs, has 4 neurons
 weights2 = Tensor(rand( 4, 5)) # Matrix with shape (4,5) -- takes 4 inputs, has 5 neurons
-biases1 = Tensor([1.0,1.0,1.0,1.0]) # Bias vector for first layer neurons
-biases2 = Tensor([1.0,1.0,1.0,1.0,1.0]) # Bias vector for second layer neurons
+biases1 = Tensor([1.0, 1.0, 1.0, 1.0]) # Bias vector for first layer neurons
+biases2 = Tensor([1.0, 1.0, 1.0, 1.0, 1.0]) # Bias vector for second layer neurons
 
 
 layer1_out = relu(inputs * weights1 + biases1)
@@ -130,17 +130,17 @@ loss = softmax_crossentropy(layer2_out,y_true)
 
 
 println(loss)
-# output: Tensor([1.9662258101705288])</code></pre><p>Now we can find the derivative of the loss with respect to the weights and biases (and inputs if we want although that isn&#39;t as relevant).</p><pre><code class="language-julia hljs">backward(loss)
+# output: Tensor([2.137377648400186])</code></pre><p>Now we can find the derivative of the loss with respect to the weights and biases (and inputs if we want although that isn&#39;t as relevant).</p><pre><code class="language-julia hljs">backward(loss)
 
 println(weights1.grad)
-# output: [0.15435974752037773 -0.15345737221995426 0.2758968460269525 0.10323749643003427; 0.10696292189737254 -0.18148549954816842 0.20715095141049542 0.12882715523280347; 0.16664054851985355 -0.23974576071873882 0.31358944957671503 0.16792563848560238] 
+# output: [-0.3908952261176255 0.12683215951155127 0.2416920583878119 0.38808820865148697; -0.29634913482989794 0.07488805376600344 0.14838075027585607 0.29197521584353536; -0.4750896539667244 0.14050215019726503 0.27138275497284103 0.4702367656227933]
 
 println(weights2.grad)
-# output: [1.4368011084584609 -1.2194506134059484 0.01035073085763216 -0.28468347036857006 0.05698224445842545; 1.1107416179804015 -0.8773320376457919 0.008372825855784966 -0.28744229473297594 0.04565988854258152; 1.0101174661066419 -0.8246890949782356 0.007462028540626175 -0.233753522609643 0.04086312294061065; 0.9055652666627538 -0.7839803418601996 0.00643629203797843 -0.16355609507053923 0.035534878230006596]
+# output: [0.863617972699941 -0.2976748175494542 0.023649534838850777 -0.6817622076321975 0.09216951764285997; 1.0039983446760201 -0.3429788768507116 0.02749410384710956 -0.7956612611906658 0.10714768951824792; 1.19691493443326 -0.43168111913872687 0.03277440852700377 -0.9257730447883243 0.1277648209667876; 1.0153161801798791 -0.3479645917015216 0.02780390869850365 -0.8035124553248412 0.10835695814798015]
 
 
 println(biases1.grad)
-# output: [0.1994372624495202, -0.31780293172407714, 0.38186796081101293, 0.22451103170524483]
+# output: [-0.5767635099832011 0.16409112495001651 0.31884196813703536 0.5701877733300129]
 
 println(biases2.grad)
-# output: [0.5783840763706425, -0.4259635644934768, 0.0045351214402561, -0.18149144684303034, 0.024535813525608553]</code></pre><p>Pretty cool! To see how all of this actually works, check out the <a href="../under_the_hood/">Under the Hood</a> section. For more extensive tutorials, check out the <a href="../tutorials/linear_regression/">linear regression</a> and <a href="../tutorials/mnist/">MNIST</a> sections.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Welcome</a><a class="docs-footer-nextpage" href="../under_the_hood/">Under the Hood »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Tuesday 11 June 2024 22:39">Tuesday 11 June 2024</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+# output: [0.5785120187360111 -0.20248891413334258 0.01584176327066983 -0.453610397799674 0.06174552992633567]</code></pre><p>Pretty cool! To see how all of this actually works, check out the <a href="../under_the_hood/">Under the Hood</a> section. For more extensive tutorials, check out the <a href="../tutorials/linear_regression/">linear regression</a> and <a href="../tutorials/mnist/">MNIST</a> sections.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Welcome</a><a class="docs-footer-nextpage" href="../under_the_hood/">Under the Hood »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Friday 21 June 2024 20:38">Friday 21 June 2024</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
