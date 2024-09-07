@@ -487,5 +487,24 @@ function zero_grad(v::Value, visited=Value[])
 end
 
 
+# zero_grad (Tensor)
+function zero_grad(v::Tensor, visited=Tensor[])
+    if !(v in visited)
+
+        push!(visited, v)
+
+        v.grad .= 0
+
+        if v.op != nothing
+            for operand in v.op.args
+                if operand isa Tensor
+                    zero_grad(operand, visited)
+                end
+            end
+        end
+
+    end
+end
+
 
 end # module
