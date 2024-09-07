@@ -506,5 +506,27 @@ function zero_grad(v::Tensor, visited=Tensor[])
     end
 end
 
+# nicer printing for Tensors, overwriting old show(io::IO, tensor::Tensor) function
+function show(io::IO, tensor::Tensor)
+
+    print(io, "Tensor(")
+    for i in 1:size(tensor)[1]
+
+        if i==1
+            print(io, tensor.data[i,:], "\n")
+        elseif i < size(tensor)[1]
+            print(io, "       ",tensor.data[i,:], "\n")
+        else
+            print(io, "       ",tensor.data[i,:], ")")
+        end
+
+    end
+
+end
+
+
+
+
+
 
 end # module
