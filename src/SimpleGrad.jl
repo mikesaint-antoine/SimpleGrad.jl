@@ -463,6 +463,29 @@ function backward(a::Tensor)
 end
 
 
+#############################################################################################
+# NOTE: past this point is new code not in the original tutorial website or video series
+#############################################################################################
+
+
+# zero_grad (Value) - same idea as build_topo()
+function zero_grad(v::Value, visited=Value[])
+    if !(v in visited)
+
+        push!(visited, v)
+        v.grad = 0
+
+        if v.op != nothing
+            for operand in v.op.args
+                if operand isa Value
+                    zero_grad(operand, visited)
+                end
+            end
+        end
+
+    end
+end
+
 
 
 end # module
