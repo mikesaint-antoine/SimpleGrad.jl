@@ -268,10 +268,10 @@ function Tensor(x::Array{Float64, 1}; column_vector::Bool=false)
 end
 
 
-
-function show(io::IO, tensor::Tensor)
-    print(io, "Tensor(",tensor.data, ")")
-end
+# original show function for Tensor. commenting out because i've now added a nicer show function (at the bottom of this file)
+# function show(io::IO, tensor::Tensor)
+#     print(io, "Tensor(",tensor.data, ")")
+# end
 
 backprop!(tensor::Tensor{Nothing}) = nothing
 
