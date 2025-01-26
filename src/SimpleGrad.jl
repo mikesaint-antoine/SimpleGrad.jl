@@ -525,6 +525,35 @@ function show(io::IO, tensor::Tensor)
 end
 
 
+##################################################
+# still need to write tests for these
+
+# Tensor negation
+function -(a::Tensor)
+
+    out = 0.0 .- a.data
+    result = Tensor(out, zeros(Float64, size(out)), Operation(-, (a,))) # Tensor(data, grad, op)
+    return result
+
+end
+
+
+
+# Tensor negation backprop
+function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<:typeof(-), ArgTypes}
+
+    tensor.op.args[1].grad -= tensor.grad
+
+    # more memory efficient to do it this way. not sure if i should change all of them
+    # tensor.op.args[1].grad .-= tensor.grad
+
+end
+
+
+
+
+
+
 
 
 
