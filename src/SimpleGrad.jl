@@ -549,7 +549,12 @@ function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<
 
 end
 
+# Tensor subtraction
+function -(a::Tensor, b::Tensor)
 
+    return a + (-b)
+    
+end
 
 
 
