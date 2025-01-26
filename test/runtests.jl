@@ -1,4 +1,10 @@
-using SimpleGrad
+# # local version
+include("/Users/mikesaint-antoine/Desktop/SimpleGrad/src/SimpleGrad_LOCAL.jl")
+using .SimpleGrad
+
+# # installed version
+# using SimpleGrad
+
 using Test
 using Random
 Random.seed!(1234)
@@ -258,7 +264,7 @@ end
 
 
 
-@testset "Tensor tests" begin
+@testset "Tensor tests - simple NN" begin
 
 
     inputs_vals = rand(2, 3) * 10
@@ -357,3 +363,33 @@ end
     @test all(abs.(biases2.grad .- biases2_num_grad) .< 1e-5)
 
 end
+
+
+
+@testset "Tensor tests - elementwise ops" begin
+
+    delta_var = 0.00000001
+
+
+    # negation op
+    a_vals = rand(5) 
+    a = Tensor(a_vals, column_vector=true)
+    neg_a = -a
+    @test all(neg_a.data .==  (-1 .* a_vals))
+
+    # negation gradient
+    neg_a.grad .= ones(size(a_vals))
+    backward(neg_a)
+    a_new = deepcopy(a)
+    a_new.data .+= delta_var
+    neg_a_new = -a_new
+    delta_result = neg_a_new.data - neg_a.data
+    a_num_grad = delta_result ./ delta_var   
+    @test all(abs.(a.grad .- a_num_grad) .< 1e-5)
+    
+
+
+
+
+end
+
