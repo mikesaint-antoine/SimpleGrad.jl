@@ -390,6 +390,70 @@ end
 
 
 
+    # subtraction op
+    a_vals = rand(5) 
+    b_vals = rand(5) 
+
+    c1_vals = a_vals .- b_vals
+    c2_vals = b_vals .- a_vals
+
+    a = Tensor(a_vals, column_vector=true)
+    b = Tensor(b_vals, column_vector=true)
+
+    c1 = a - b
+    c2 = b - a
+
+    @test all(c1.data .==  c1_vals)
+    @test all(c2.data .==  c2_vals)
+
+
+
+    # subtraction gradient
+
+    delta_var = 0.00000001
+
+    c1.grad .= ones(size(c1))
+    backward(c1)
+
+    a_new = deepcopy(a)
+    a_new.data .+= delta_var
+    c1_new = a_new - b
+    delta_result = c1_new.data - c1.data
+    a_num_grad = delta_result ./ delta_var   
+    @test all(abs.(a.grad .- a_num_grad) .< 1e-5)
+
+    b_new = deepcopy(b)
+    b_new.data .+= delta_var
+    c1_new = a - b_new
+    delta_result = c1_new.data - c1.data
+    b_num_grad = delta_result ./ delta_var   
+    @test all(abs.(b.grad .- b_num_grad) .< 1e-5)
+
+
+    zero_grad(c1)
+    backward(c2)
+
+    a_new = deepcopy(a)
+    a_new.data .+= delta_var
+    c2_new = b - a_new
+    delta_result = c2_new.data - c2.data
+    a_num_grad = delta_result ./ delta_var   
+    @test all(abs.(a.grad .- a_num_grad) .< 1e-5)
+
+    b_new = deepcopy(b)
+    b_new.data .+= delta_var
+    c2_new = b_new - a
+    delta_result = c2_new.data - c2.data
+    b_num_grad = delta_result ./ delta_var   
+    @test all(abs.(b.grad .- b_num_grad) .< 1e-5)
+
+
+
+
+
+
+
+
 
 end
 
