@@ -1,5 +1,5 @@
 module SimpleGrad
-export Value, Tensor, relu, softmax_crossentropy, backward
+export Value, Tensor, relu, softmax_crossentropy, backward, zero_grad
 
 # Base functions that we're going to be overriding 
 import Base: ==, show, +, *, exp, log, -, ^, inv, /, tanh
@@ -523,40 +523,6 @@ function show(io::IO, tensor::Tensor)
     end
 
 end
-
-
-##################################################
-# still need to write tests for these
-
-# Tensor negation
-function -(a::Tensor)
-
-    out = 0.0 .- a.data
-    result = Tensor(out, zeros(Float64, size(out)), Operation(-, (a,))) # Tensor(data, grad, op)
-    return result
-
-end
-
-
-
-# Tensor negation backprop
-function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<:typeof(-), ArgTypes}
-
-    tensor.op.args[1].grad -= tensor.grad
-
-    # more memory efficient to do it this way. not sure if i should change all of them
-    # tensor.op.args[1].grad .-= tensor.grad
-
-end
-
-# Tensor subtraction
-function -(a::Tensor, b::Tensor)
-
-    return a + (-b)
-    
-end
-
-
 
 
 
