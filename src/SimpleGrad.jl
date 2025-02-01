@@ -591,6 +591,15 @@ function sum(a::Tensor)
 end
 
 
+# Tensor sum backprop
+function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<:typeof(sum), ArgTypes}
+
+    # gradient for each element in the summed-matrix is just 1. so because of chain rule, we just broadcast back the result gradient
+    tensor.op.args[1].grad += ones(size(tensor.op.args[1].grad)) .* tensor.grad
+
+end
+
+
 
 
 
