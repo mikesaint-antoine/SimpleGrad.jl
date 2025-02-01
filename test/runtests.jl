@@ -378,7 +378,6 @@ end
     @test all(neg_a.data .==  (-1 .* a_vals))
 
     # negation gradient
-    neg_a.grad .= ones(size(a_vals))
     backward(neg_a)
     a_new = deepcopy(a)
     a_new.data .+= delta_var
@@ -412,7 +411,6 @@ end
 
     delta_var = 0.00000001
 
-    c1.grad .= ones(size(c1))
     backward(c1)
 
     a_new = deepcopy(a)
@@ -450,6 +448,41 @@ end
 
 
 
+    # element-wise multiplication op
+    a_vals = rand(5) *10
+    b_vals = rand(5) *10
+
+    c_vals = a_vals .* b_vals
+
+    a = Tensor(a_vals, column_vector=true)
+    b = Tensor(b_vals, column_vector=true)
+
+    c = element_mul(a,b)
+
+    @test all(c.data .==  c_vals)
+
+
+
+    # # element-wise multiplication gradient
+
+    delta_var = 0.00000001
+
+    backward(c)
+
+    a_new = deepcopy(a)
+    a_new.data .+= delta_var
+    c_new = element_mul(a_new, b)
+    delta_result = c_new.data - c.data
+    a_num_grad = delta_result ./ delta_var   
+    println(abs.(a.grad .- a_num_grad))
+    @test all(abs.(a.grad .- a_num_grad) .< 1e-5)
+
+    b_new = deepcopy(b)
+    b_new.data .+= delta_var
+    c_new = element_mul(a, b_new)
+    delta_result = c_new.data - c.data
+    b_num_grad = delta_result ./ delta_var   
+    @test all(abs.(b.grad .- b_num_grad) .< 1e-5)
 
 
 
