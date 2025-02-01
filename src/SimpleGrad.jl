@@ -2,7 +2,7 @@ module SimpleGrad
 export Value, Tensor, relu, softmax_crossentropy, backward, zero_grad, element_mul
 
 # Base functions that we're going to be overriding 
-import Base: ==, show, +, *, exp, log, -, ^, inv, /, tanh
+import Base: ==, show, +, *, exp, log, -, ^, inv, /, tanh, sum
 
 
 # Operation
@@ -581,6 +581,14 @@ function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<
 end
 
 
+# Tensor sum (just sums up all numbers and returns a (1,1) Tensor. doesn't sum along axis)
+function sum(a::Tensor)
+
+    out = [sum(a.data);;] # should have shape (1,1). will need to change if this eventually supports axis-summation
+    result = Tensor(out, zeros(Float64, size(out)), Operation(sum, (a,))) # Tensor(data, grad, op)
+    return result
+
+end
 
 
 
