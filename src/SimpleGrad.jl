@@ -1,5 +1,5 @@
 module SimpleGrad
-export Value, Tensor, relu, softmax_crossentropy, backward, zero_grad
+export Value, Tensor, relu, softmax_crossentropy, backward, zero_grad, element_mul
 
 # Base functions that we're going to be overriding 
 import Base: ==, show, +, *, exp, log, -, ^, inv, /, tanh
