@@ -558,4 +558,32 @@ end
 
 
 
+
+
+# Tensor element-wise multiplication
+function element_mul(a::Tensor, b::Tensor)
+
+    out = a.data .* b.data
+    result = Tensor(out, zeros(Float64, size(out)), Operation(element_mul, (a,b))) # Tensor(data, grad, op)
+    return result
+
+end
+
+
+# Tensor element-wise backprop
+function backprop!(tensor::Tensor{Operation{FunType, ArgTypes}}) where {FunType<:typeof(element_mul), ArgTypes}
+
+    tensor.op.args[1].grad += tensor.op.args[2].data .* tensor.grad
+    tensor.op.args[2].grad += tensor.op.args[1].data .* tensor.grad
+
+    # again, .+= is faster than += because it's in-place. but not what I used for the video tutorials, so not sure if should be changed
+
+end
+
+
+
+
+
+
+
 end # module
